@@ -32,7 +32,8 @@
   const dymek = $('#dymek');
   let zegarDymka = 0, wlasciciel = null;
   function pokazDymek(el) {
-    const t = el.getAttribute('data-dymek'); if (!t) return;
+    // Dymek tylko wtedy, gdy napis go nie powtarza: widoki w średnim oknie są samą ikoną, a szersze mają napis.
+    const t = el.getAttribute('data-dymek'); if (!t || el.innerText.trim() === t) return;
     wlasciciel = el; dymek.textContent = t; dymek.hidden = false;
     const r = el.getBoundingClientRect(), d = dymek.getBoundingClientRect();
     let x = r.left + r.width / 2 - d.width / 2, y = r.bottom + 8;

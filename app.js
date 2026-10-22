@@ -21,7 +21,7 @@
   }
 
   // ---------------------------------------------------------------- stan i pamięć
-  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), soczewka: { marki: 'ogolem', modele: 'ogolem' }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false } });
+  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), kolumny: ['ogolem', 'bezp', 'niez'], soczewka: { marki: 'ogolem', modele: 'ogolem' }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false } });
   let st = poczatek();
   try {
     const z = JSON.parse(localStorage.getItem(KLUCZ) || 'null');
@@ -30,7 +30,7 @@
       if (!WIDOKI[st.widok]) st.widok = 'marki'; }
   } catch { /* pierwszy raz */ }
   st.szczegoly = null; st.edycja = null;
-  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, soczewka: st.soczewka, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
+  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
   const zapisz = () => { try { localStorage.setItem(KLUCZ, trwale()); } catch { /* bez pamięci */ } };
 
   // Historia operacji: zrzut stanu przed zmianą. Nowa zmiana kasuje to, co było do ponowienia.
@@ -55,7 +55,7 @@
     const istniejace = [...pasek.children].map((b) => b.dataset.id).join();
     if (istniejace !== st.kolejnosc.join()) {
       pasek.innerHTML = st.kolejnosc.map((k) => { const [n, i, w] = WIDOKI[k];
-        return `<button class="widok" type="button" role="tab" data-id="${k}" data-w="${w}" id="tab-${k}" aria-controls="tresc"><span class="kafel">${ik(i)}</span><span class="napis" data-n="${esc(n)}"><span>${esc(n)}</span></span></button>`; }).join('');
+        return `<button class="widok" type="button" role="tab" data-id="${k}" data-w="${w}" id="tab-${k}" aria-controls="tresc" aria-label="${esc(n)}" data-dymek="${esc(n)}"><span class="kafel">${ik(i)}</span><span class="napis" data-n="${esc(n)}"><span>${esc(n)}</span></span></button>`; }).join('');
       for (const b of pasek.children) U.polysk(b, getComputedStyle(b).getPropertyValue('--h').trim() || '#0071e3', ciemny.matches);
     }
     for (const b of pasek.children) { const tak = b.dataset.id === st.widok; b.setAttribute('aria-selected', String(tak)); b.tabIndex = tak ? 0 : -1; }
@@ -74,6 +74,11 @@
     document.title = d ? `${tytulSzczegolow(d)} · Atlas Samochodów` : `${WIDOKI[st.widok][0]} · Atlas Samochodów`;
     if (!$('#filtry-arkusz').hidden) rysujArkusz();
     if (st.widok === 'moj' && !d) { const z = $('#zestawy'); if (z) U.przeciagalne(z, '.zestaw', { os: 'y', poZmianie: (ids, fokus) => zmien('kolejność zestawów', () => { st.zestawy = ids.map((id) => st.zestawy.find((x) => x.id === id)); }) || fokusuj(fokus) }); }
+    const glowka = !d && tresc.querySelector('.lista thead tr');
+    // Kolumny ocen przestawia nagłówek tabeli i pigułki kolejności (wąskie okno, telefon z myszą): jedna kolejność w st.kolumny.
+    const kolumny = (kontener, sel, cel) => U.przeciagalne(kontener, sel, { os: 'x', poZmianie: (ids, fokus) => { zmien('kolejność kolumn', () => { st.kolumny = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(cel(fokus)); if (b) b.focus(); }); } });
+    if (glowka && glowka.querySelector('th[data-id]')) kolumny(glowka, 'th[data-id]', (k) => `th[data-id="${k}"] button`);
+    if (!d) for (const s of tresc.querySelectorAll('.soczewki')) kolumny(s, '.chip[data-id]', (k) => `.soczewki .chip[data-id="${k}"]`);
     if (st.edycja) { const p = tresc.querySelector('.nazwa-zestawu'); if (p) { p.focus(); p.select(); } }
     if (przewin != null) scrollTo(0, przewin);
     if (sel && !st.edycja && !document.activeElement.closest?.('.zapis')) { const e = (wArkuszu && arkusz.querySelector(sel)) || document.querySelector(sel); if (e && e !== document.activeElement) e.focus({ preventScroll: true }); }

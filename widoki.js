@@ -15,12 +15,15 @@
   const ocena = (x, s, szac) => (x == null ? '<span class="ocena brak">–</span>' : `<span class="ocena${szac ? ' szac' : ''}" data-s="${s}">${liczba(x)}</span>`);
   const zakres = (ry) => (ry && ry.ceny ? `${tys(ry.ceny[0])}–${tys(ry.ceny[2])} tys. zł` : '');
 
-  const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOLUMNY.map(([k, n, i]) =>
-    `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}">${n}</button>`).join('') + '</div>';
+  const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, n]) =>
+    `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}">${n}</button>`).join('') + '</div>';
+  // Kolumny ocen w kolejności Jacka (przeciągane myszą albo Alt + strzałka na nagłówku i na pigułce, app.js), domyślnie ogółem, bezpieczeństwo, niezawodność.
+  let KOL = KOLUMNY;
+  const ustawKolumny = (kolejnosc) => { KOL = (kolejnosc || []).map((k) => KOLUMNY.find((x) => x[0] === k)).filter(Boolean); if (KOL.length !== KOLUMNY.length) KOL = KOLUMNY; };
   const naglowki = (akt, gdzie, ile, dodatkowe = '') => '<thead><tr><th><span class="ukryte">Miejsce</span></th><th><span class="naglowek-kolumny">' + (gdzie === 'marki' ? ile + ' ' + odmiana(ile, 'marka', 'marki', 'marek') : ile + ' ' + odmiana(ile, 'model', 'modele', 'modeli')) + '</span></th>'
-    + KOLUMNY.map(([k, n]) => `<th class="liczba${k === akt ? '' : ' tylko-szeroki'}"${k === akt ? ' aria-sort="descending"' : ''}><button class="naglowek-kolumny" type="button" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}">${n}</button></th>`).join('')
+    + KOL.map(([k, n]) => `<th data-id="${k}" class="liczba${k === akt ? '' : ' tylko-szeroki'}"${k === akt ? ' aria-sort="descending"' : ''}><button class="naglowek-kolumny" type="button" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}">${n}</button></th>`).join('')
     + dodatkowe + '</tr></thead>';
-  const komorki = (o, akt, sk) => KOLUMNY.map(([k]) => `<td class="liczba${k === akt ? '' : ' tylko-szeroki'}">${ocena(o[k], sk[k](o[k]), k === 'niez' ? o.niezSzac : k === 'ogolem' && o.niezSzac)}</td>`).join('');
+  const komorki = (o, akt, sk) => KOL.map(([k]) => `<td class="liczba${k === akt ? '' : ' tylko-szeroki'}">${ocena(o[k], sk[k](o[k]), k === 'niez' ? o.niezSzac : k === 'ogolem' && o.niezSzac)}</td>`).join('');
   // Skala liczona na całej liście, nie na widocznej dziesiątce: czerwony znaczy słabszy w całym rankingu.
   const skale = (lista) => Object.fromEntries(KOLUMNY.map(([k]) => [k, U.skala(lista.map((o) => o[k]))]));
   const miejsce = (i) => `<span class="miejsce${i < 3 ? ' podium' : ''}">${i + 1}</span>`;
@@ -28,6 +31,7 @@
 
   // ---------------------------------------------------------------- Marki
   function marki(st) {
+    ustawKolumny(st.kolumny);
     const akt = st.soczewka.marki;
     const { lista, malo } = O.rankingMarek(A().marki, akt);
     const widac = st.wszystkie.marki ? lista : lista.slice(0, 10);
@@ -66,6 +70,7 @@
 
   // ---------------------------------------------------------------- Modele
   function modele(st) {
+    ustawKolumny(st.kolumny);
     const akt = st.soczewka.modele, f = st.filtry;
     const wynik = O.rankingModeli(A().modele, f, akt);
     const widac = st.wszystkie.modele ? wynik : wynik.slice(0, 10);
@@ -190,17 +195,17 @@
       + `<li>${p('lider', '86')}<span>Najlepszy w tej kolumnie</span></li>`
       + `<li>${p('3', '84')}<span>Dobry na tle listy</span></li>`
       + `<li>${p('0', '71')}<span>Najsłabszy na tle listy</span></li>`
-      + `<li><span class="ocena szac" data-s="2" style="--wiersz:var(--strona)">80</span><span>Szacunek: brak w ankiecie usterek</span></li>`
+      + `<li><span class="ocena szac" data-s="2" style="--wiersz:var(--strona)">80</span><span>Szacunek bez ankiety usterek</span></li>`
       + '</ul></section>'
       + '<section><h3>Kliknięcia</h3><ul>'
       + `<li><span class="miejsce podium">1</span><span>Wiersz otwiera szczegóły</span></li>`
-      + `<li><span class="przycisk" style="pointer-events:none">${ik('zapisz')}Zapisz</span><span>Zestaw filtrów trafia do Mojego rankingu</span></li>`
-      + `<li><span>${ik('telefon')}</span><span>Telefon mówi o klasie auta, nie o cenie</span></li>`
-      + `<li><span>Mysz</span><span>Przeciągnij widoki u góry albo zestawy</span></li>`
+      + `<li><span class="przycisk" style="pointer-events:none">${ik('zapisz')}Zapisz</span><span>Filtry do Mojego rankingu</span></li>`
+      + `<li><span>${ik('telefon')}</span><span>Ta sama klasa, nie cena</span></li>`
+      + `<li><span>Mysz</span><span>Przeciągnij, żeby przestawić</span></li>`
       + '</ul></section>'
-      + '<section style="grid-column:1/-1"><h3>Skróty</h3><ul style="grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px">'
+      + '<section class="szeroka"><h3>Skróty</h3><ul class="dwie-kolumny">'
       + '<li><kbd>Ctrl Z</kbd><span>Cofnij</span></li><li><kbd>Ctrl Y</kbd><span>Ponów</span></li>'
-      + '<li><kbd>Alt ← →</kbd><span>Przestaw widok</span></li><li><kbd>Alt ↑ ↓</kbd><span>Przestaw zestaw</span></li>'
+      + '<li><kbd>Alt ← →</kbd><span>Przestaw widok albo kolumnę</span></li><li><kbd>Alt ↑ ↓</kbd><span>Przestaw zestaw</span></li>'
       + '<li><kbd>Esc</kbd><span>Zamknij albo wróć</span></li><li><kbd>Ctrl kółko</kbd><span>Powiększ ściągę</span></li>'
       + '</ul></section>';
   }

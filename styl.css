@@ -91,7 +91,7 @@ body.czyta .widok[aria-selected="true"] { animation: none; }
 .widok.cel-przed { box-shadow: var(--cien), -14px 0 0 -12px var(--akcent); }
 
 /* ------------------------------------------------------------------ przyciski */
-.przycisk {
+.przycisk { position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
   font-size: 14px; font-weight: 600; color: var(--link); background: var(--przycisk); box-shadow: var(--cien); white-space: nowrap;
   transition: transform .1s ease, box-shadow .15s ease; touch-action: manipulation;
@@ -103,11 +103,19 @@ body.czyta .widok[aria-selected="true"] { animation: none; }
 @media (prefers-color-scheme: dark) { .przycisk.glowny { color: #000; } }
 .przycisk.glowny:hover { background: color-mix(in srgb, var(--akcent) 92%, #fff); }
 .przycisk .ikona { width: 16px; height: 16px; }
-.okragly { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; color: var(--link);
+.okragly { position: relative; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; color: var(--link);
   background: var(--przycisk); box-shadow: var(--cien); transition: transform .1s ease, box-shadow .15s ease; touch-action: manipulation; }
 .okragly:hover { transform: translateY(-1px); box-shadow: var(--cien), 0 0 0 1px var(--akcent); }
 .okragly:active { transform: scale(.94); }
 .okragly.maly { width: 32px; height: 32px; }
+/* Cel dotyku 48 px przy mniejszym kółku: niewidoczny pas wokół (reguła telefonu). */
+.okragly::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; }
+.okragly.maly::after { inset: -8px; }
+th[data-id] { cursor: grab; }
+/* Przestawianie kolumn ocen: przeciągana przygaszona, kreska w akcencie przed miejscem upuszczenia. */
+th.ciagniety .naglowek-kolumny, .chip.ciagniety { opacity: .45; }
+th.cel-przed { box-shadow: inset 2px 0 0 var(--akcent); }
+.chip.cel-przed::before { content: ""; position: absolute; left: -9px; top: 8px; bottom: 8px; width: 2px; border-radius: 1px; background: var(--akcent); }
 .okragly.maly .ikona { width: 16px; height: 16px; }
 
 /* ------------------------------------------------------------------ układ treści */
@@ -117,7 +125,7 @@ main { padding: 0 24px 48px; outline: none; }
 .uklad.dwie { grid-template-columns: 320px minmax(0, 1fr); align-items: start; }
 .karta { background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); }
 .karta-tresc { padding: 20px 24px 24px; }
-.naglowek-karty { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 20px 24px 12px; }
+.naglowek-karty { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; padding: 20px 24px 12px; }
 .naglowek-karty h2 { margin: 0; font-size: 17px; font-weight: 600; }
 .naglowek-karty .licznik { margin-left: auto; font-size: 13px; color: var(--drugi); }
 h1 { font-size: 28px; line-height: 1.2; font-weight: 700; margin: 0; letter-spacing: -.01em; }
@@ -126,10 +134,10 @@ h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
 p { margin: 0 0 12px; }
 
 /* soczewki (kolejność) i chipy */
-.soczewki, .chipy { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.soczewki, .chipy { display: flex; flex-wrap: wrap; gap: 8px 16px; }
 .pasek-listy { display: none; }
 .chip {
-  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
+  position: relative; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
   font-size: 14px; font-weight: 500; color: var(--tekst); background: var(--pole); box-shadow: var(--cien); white-space: nowrap;
   transition: transform .1s ease, background-color .15s ease; touch-action: manipulation;
 }
@@ -137,7 +145,7 @@ p { margin: 0 0 12px; }
 .chip:active { transform: scale(.97); }
 .chip[aria-pressed="true"], .chip[aria-checked="true"] {
   font-weight: 650; background: color-mix(in srgb, var(--akcent) 18%, var(--karta));
-  box-shadow: var(--cien), 0 0 0 2px var(--karta), 0 0 0 3.5px var(--akcent);
+  box-shadow: var(--cien), 0 0 0 2px var(--karta), 0 0 0 4px var(--akcent);
 }
 .chip .ikona { width: 16px; height: 16px; color: var(--drugi); }
 .chip[aria-pressed="true"] .ikona, .chip[aria-checked="true"] .ikona { color: var(--akcent); }
@@ -162,7 +170,7 @@ p { margin: 0 0 12px; }
 .zapis input { flex: 1 1 160px; min-width: 0; height: 36px; padding: 0 14px; border: 0; border-radius: 18px; background: var(--strona);
   box-shadow: inset 0 0 0 1px var(--linia); font-size: 15px; }
 .zapis input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--akcent); }
-.filtry-stopka { display: flex; gap: 12px; flex-wrap: wrap; }
+.filtry-stopka { display: flex; gap: 12px 16px; flex-wrap: wrap; }
 
 /* ------------------------------------------------------------------ listy rankingów */
 .lista { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -173,6 +181,8 @@ p { margin: 0 0 12px; }
 .naglowek-kolumny { display: inline-flex; align-items: center; height: 28px; padding: 0 16px; border: 0; border-radius: 14px; font-size: 13px; font-weight: 600;
   color: var(--drugi); background: var(--strona); box-shadow: var(--cien); white-space: nowrap; }
 button.naglowek-kolumny:hover { transform: translateY(-1px); }
+/* Nagłówek, którego nie da się kliknąć (liczba, „Model”, „Na Otomoto”), jest zwykłym napisem, bez kształtu przycisku. */
+span.naglowek-kolumny { padding: 0; background: none; box-shadow: none; }
 th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in srgb, var(--akcent) 12%, var(--karta)); box-shadow: var(--cien), 0 0 0 1.5px var(--akcent); }
 .lista tbody tr { --wiersz: var(--karta); cursor: pointer; }
 .lista tbody tr:nth-child(even of :not([hidden])) { --wiersz: var(--pas); }
@@ -271,7 +281,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .zestaw.wylaczony .opis-zestawu { opacity: .55; }
 .zestaw .opis-zestawu b { font-weight: 600; display: block; }
 .zestaw .opis-zestawu span { font-size: 13px; color: var(--drugi); }
-.zestaw .akcje { display: flex; gap: 8px; }
+.zestaw .akcje { display: flex; gap: 16px; }
 .zestaw.ciagniety { opacity: .45; }
 .zestaw.cel-przed { box-shadow: 0 -3px 0 -1px var(--akcent); }
 .przelacznik { width: 44px; height: 26px; padding: 2px; border: 0; border-radius: 13px; background: var(--pole); box-shadow: inset 0 0 0 .5px var(--wlosek); transition: background-color .2s ease; }
@@ -288,8 +298,8 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .filtry-arkusz .glowka h2 { margin: 0; }
 .filtry-arkusz .srodek { overflow-y: auto; overscroll-behavior: contain; padding: 8px 24px 24px; }
 .filtry-arkusz .stopka { padding: 12px 24px 16px; border-top: 1px solid var(--linia); }
-.filtry-arkusz .stopka .przycisk { width: 100%; height: 48px; border-radius: 24px; font-size: 16px; }
-.sciaga { position: fixed; z-index: 30; left: 50%; top: 50%; width: min(860px, calc(100vw - 48px)); max-height: calc(100vh - 48px); display: flex; flex-direction: column;
+.filtry-arkusz .stopka .przycisk { position: relative; width: 100%; height: 48px; border-radius: 24px; font-size: 16px; }
+.sciaga { position: fixed; z-index: 30; left: 50%; top: 50%; width: min(960px, calc(100vw - 48px)); max-height: calc(100vh - 48px); display: flex; flex-direction: column;
   transform: translate(-50%, -50%) scale(var(--skala, 1)); transform-origin: center; background: var(--karta); border-radius: 18px; box-shadow: var(--cien-arkusza); }
 .sciaga .zamknij { position: absolute; top: 12px; right: 12px; }
 .sciaga .srodek { overflow: auto; overscroll-behavior: contain; padding: 32px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; cursor: grab; }
@@ -300,6 +310,8 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .sciaga li { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 12px; font-size: 15px; }
 .sciaga li > :first-child { display: flex; align-items: center; justify-content: center; height: 28px; }
 .sciaga kbd { font: 600 12px/1 "Inter", sans-serif; padding: 5px 7px; border-radius: 6px; background: var(--karta); box-shadow: var(--cien); white-space: nowrap; }
+.sciaga .szeroka { grid-column: 1 / -1; }
+.sciaga .dwie-kolumny { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
 .sciaga .uchwyt { position: absolute; right: 6px; bottom: 6px; width: 20px; height: 20px; color: var(--drugi); cursor: nwse-resize; }
 .sciaga .uchwyt .ikona { width: 20px; height: 20px; }
 .dymek { position: fixed; z-index: 40; max-width: 260px; padding: 9px 14px; border-radius: 12px; font-size: 13px; line-height: 1.35; color: var(--tekst);
@@ -319,6 +331,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .uklad.dwie > .filtry-karta { display: none; }
   .tylko-waski { display: inline-flex; }
   .pasek-listy.dla-filtrow { display: flex; }
+  .pasek-listy .soczewki { display: none; }
   .siatka-szczegolow, .przewodnik { grid-template-columns: 1fr; }
 }
 
@@ -327,7 +340,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   body { font-size: 16px; padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   .gora { padding: 12px 16px 0; grid-template-columns: minmax(0, 1fr) auto; }
   .gora-lewa { grid-column: 1; }
-  .widoki { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 8px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  .widoki { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 16px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     background: color-mix(in srgb, var(--strona) 86%, transparent); backdrop-filter: blur(16px) saturate(1.6); -webkit-backdrop-filter: blur(16px) saturate(1.6);
     box-shadow: 0 -.5px 0 var(--wlosek); }
   .widok { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 4px; width: auto; max-width: 104px; height: 56px; padding: 0 4px; border-radius: 16px; font-size: 12px; }
@@ -344,12 +357,11 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .lista th:last-child, .lista td:last-child { padding-right: 12px; }
   .lista .tylko-szeroki { display: none; }
   .tylko-telefon { display: inline; }
-  .pasek-listy { display: flex; }
+  .pasek-listy, .pasek-listy .soczewki { display: flex; }
   .naglowek-karty .licznik { display: none; }
-  .soczewki { gap: 8px; flex-wrap: nowrap; }
-  .soczewki .chip { padding: 0 14px; }
+
   .tytul-widoku { display: block; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
-  .tytul-widoku .przycisk { font-size: 15px; }
+  .tytul-widoku .przycisk { position: relative; font-size: 15px; }
   .szczegoly > .wstecz { display: none; }
   .przewodnik a, .szczegoly a:not(.przycisk) { min-height: 44px; }
   .wyniki { grid-template-columns: 1fr; gap: 0; background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); overflow: hidden; }
@@ -366,12 +378,17 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .zestawy { padding: 0 16px 16px; }
   .zestaw { grid-template-columns: auto minmax(0, 1fr); }
   .zestaw .akcje { grid-column: 1 / -1; justify-content: flex-end; }
-  .chip { height: 40px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; background-clip: padding-box; height: 48px; }
+  .przycisk::after { content: ""; position: absolute; inset: -6px -2px; border-radius: inherit; }
+  .chip { position: relative; height: 40px; border-radius: 20px; }
+  .chip::after { content: ""; position: absolute; inset: -4px 0; border-radius: inherit; }
   .sciaga .srodek { grid-template-columns: 1fr; padding: 48px 16px 16px; }
+  .sciaga section { padding: 16px; }
+  .sciaga .dwie-kolumny { grid-template-columns: 1fr; }
   .sciaga { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
   .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
   h1 { font-size: 24px; }
 }
+/* Najwęższe telefony: cztery widoki mieszczą się dopiero przy 8 px odstępu. */
 @media (max-width: 380px) {
-  .soczewki .chip { padding: 0 12px; font-size: 13px; }
+  .widoki { gap: 8px; }
 }
