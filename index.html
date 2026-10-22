@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Atlas Samochodów">
+<title>Atlas Samochodów</title>
+<link rel="icon" type="image/png" sizes="16x16" href="ikona-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="ikona-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="ikona-48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="ikona-192.png">
+<link rel="apple-touch-icon" href="ikona-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="styl.css">
+</head>
+<body>
+<svg class="wzory" aria-hidden="true" focusable="false">
+  <symbol id="i-marki" viewBox="0 0 24 24"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.3 7.2 17.9l.9-5.4L4.2 8.7l5.4-.8z"/></symbol>
+  <symbol id="i-modele" viewBox="0 0 24 24"><path d="M3.5 15.5v-3l1.6-4.2A2 2 0 0 1 7 7h10a2 2 0 0 1 1.9 1.3l1.6 4.2v3a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M4 12.5h16"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/></symbol>
+  <symbol id="i-moj" viewBox="0 0 24 24"><path d="M5 6h14M5 12h9M5 18h6"/><path d="M18 12.2l1.1 2.2 2.4.4-1.7 1.7.4 2.4-2.2-1.1-2.2 1.1.4-2.4-1.7-1.7 2.4-.4z"/></symbol>
+  <symbol id="i-typy" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".6"/></symbol>
+  <symbol id="i-wstecz" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-dalej" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-zamknij" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-filtry" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-telefon" viewBox="0 0 24 24"><rect x="7" y="2.8" width="10" height="18.4" rx="2.6"/><path d="M10.8 5.4h2.4"/></symbol>
+  <symbol id="i-tarcza" viewBox="0 0 24 24"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.8-7 9.5-4.1-1.7-7-5.3-7-9.5V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-klucz" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.2 5.2L4 17v3h3l5.5-5.5a4 4 0 0 0 5.2-5.2l-2.4 2.4-2.5-.6-.6-2.5z"/></symbol>
+  <symbol id="i-zapisz" viewBox="0 0 24 24"><path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-usun" viewBox="0 0 24 24"><path d="M4.5 7h15M10 7V4.5h4V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-olowek" viewBox="0 0 24 24"><path d="M4 20l1-4.2L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/></symbol>
+  <symbol id="i-wyjscie" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-cofnij" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-gwiazda" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-uchwyt" viewBox="0 0 24 24"><path d="M10 20L20 10M15 20l5-5"/></symbol>
+</svg>
+<header class="gora">
+  <div class="gora-lewa"><div class="tytul-widoku" id="tytul-widoku"></div><div id="komunikat" role="status" aria-live="polite"></div></div>
+  <nav class="widoki" id="widoki" role="tablist" aria-label="Widoki"></nav>
+  <div class="gora-prawa"><button class="okragly" id="info" type="button" aria-label="Pokaż ściągę" data-dymek="Pokaż ściągę"><svg class="ikona"><use href="#i-info"/></svg></button></div>
+</header>
+<main id="tresc" tabindex="-1"></main>
+<div class="arkusz-tlo" id="arkusz-tlo" hidden></div>
+<section class="filtry-arkusz" id="filtry-arkusz" role="dialog" aria-modal="true" aria-label="Filtry" hidden></section>
+<section class="sciaga" id="sciaga" role="dialog" aria-label="Ściąga" hidden></section>
+<div class="dymek" id="dymek" role="tooltip" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script src="dane.js"></script>
+<script src="ocena.js"></script>
+<script src="ui.js"></script>
+<script src="widoki.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
