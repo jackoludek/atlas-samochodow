@@ -80,10 +80,30 @@
     if (glowka && glowka.querySelector('th[data-id]')) kolumny(glowka, 'th[data-id]', (k) => `th[data-id="${k}"] button`);
     if (!d) for (const s of tresc.querySelectorAll('.soczewki')) kolumny(s, '.chip[data-id]', (k) => `.soczewki .chip[data-id="${k}"]`);
     if (st.edycja) { const p = tresc.querySelector('.nazwa-zestawu'); if (p) { p.focus(); p.select(); } }
+    naPiksel();
     if (przewin != null) scrollTo(0, przewin);
     if (sel && !st.edycja && !document.activeElement.closest?.('.zapis')) { const e = (wArkuszu && arkusz.querySelector(sel)) || document.querySelector(sel); if (e && e !== document.activeElement) e.focus({ preventScroll: true }); }
   }
   const fokusuj = (id) => id && requestAnimationFrame(() => { const e = document.querySelector(`[data-id="${id}"]`); if (e) e.focus(); });
+  // Rząd „W skrócie” i „Całość” i przyciski pod skrótem stoją w tekście, który płynie, więc zwykle wypadają na ułamku piksela, a wtedy
+  // napis stał do 0,6 px za wysoko (pomiar 23.10.2026). Przeglądarka rysuje linię pisma na całym pikselu strony, a przy skali 1,5 jeszcze
+  // na całym pikselu ekranu, więc odstęp nad rzędem dosuwa linię pisma (dół napisu przyciętego do wersalików) na najbliższy piksel, który
+  // jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi; gdy takiego nie ma w 4 px, sam cały piksel strony; reguła „Precyzja”).
+  function naPiksel() {
+    const d = window.devicePixelRatio || 1;
+    for (const r of tresc.querySelectorAll('.wersje, .akcje-skrotu')) {
+      r.style.paddingTop = '';
+      const t = r.querySelector('.tx');
+      if (!r.offsetParent || !t) continue;
+      const y = t.getBoundingClientRect().bottom + scrollY;
+      let k = Math.ceil(y - 0.001), i = 0;
+      while (i < 4 && Math.abs((k + i) * d - Math.round((k + i) * d)) > 0.01) i++;
+      if (i < 4) k += i;
+      if (k - y > 0.001) r.style.paddingTop = (k - y).toFixed(4) + 'px';
+    }
+  }
+  addEventListener('resize', naPiksel);
+  if (document.fonts) document.fonts.ready.then(naPiksel);
   function tytulSzczegolow(d) {
     const A = window.ATLAS;
     if (d.rodzaj === 'model') { const m = A.modele.find((x) => x.id === d.id); return m ? `${m.marka} ${m.model}` : ''; }

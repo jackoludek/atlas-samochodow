@@ -19,8 +19,8 @@
     `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}">${n}</button>`).join('') + '</div>';
   // Wersja tekstu (reguła skrot-i-wersja-pelna): najpierw „W skrócie”, potem „Całość”. Kolejność stała, bo coś znaczy: skrót prowadzi do całości.
   const wersje = (gdzie, calosc) => `<div class="wersje" role="radiogroup" aria-label="Wersja tekstu">`
-    + [['skrot', 'W skrócie'], ['calosc', 'Całość']].map(([k, n]) => `<button class="chip" type="button" role="radio" aria-checked="${(k === 'calosc') === calosc}" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="${k}">${n}</button>`).join('') + '</div>';
-  const czytajCalosc = (gdzie, haczyk, dalej = '') => `<p class="haczyk">${esc(haczyk)}</p><div class="akcje-skrotu"><button class="przycisk" type="button" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="calosc">Czytaj całość${ik('dalej')}</button>${dalej}</div>`;
+    + [['skrot', 'W skrócie'], ['calosc', 'Całość']].map(([k, n]) => `<button class="chip" type="button" role="radio" aria-checked="${(k === 'calosc') === calosc}" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="${k}"><span class="tx">${n}</span></button>`).join('') + '</div>';
+  const czytajCalosc = (gdzie, haczyk, dalej = '') => `<p class="haczyk">${esc(haczyk)}</p><div class="akcje-skrotu"><button class="przycisk" type="button" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="calosc"><span class="tx">Czytaj całość</span>${ik('dalej')}</button>${dalej}</div>`;
   // Kolumny ocen w kolejności Jacka (przeciągane myszą albo Alt + strzałka na nagłówku i na pigułce, app.js), domyślnie ogółem, bezpieczeństwo, niezawodność.
   let KOL = KOLUMNY;
   const ustawKolumny = (kolejnosc) => { KOL = (kolejnosc || []).map((k) => KOLUMNY.find((x) => x[0] === k)).filter(Boolean); if (KOL.length !== KOLUMNY.length) KOL = KOLUMNY; };
@@ -157,7 +157,7 @@
     const adres = O.adresOtomoto(m, st.filtry);
     const zast = Object.entries(O.ZASTOSOWANIA).map(([k, t]) => (m.z[k] ? `<span>${ik('ok')}${t}</span>` : `<span class="nie">${t}</span>`)).join('');
     const seg = A().przewodnik.segmenty.find((s) => s.s === m.klasa);
-    const ogloszenia = adres ? `<a class="przycisk" href="${esc(adres)}" target="_blank" rel="noopener">${ik('wyjscie')}Zobacz ogłoszenia</a>` : '';
+    const ogloszenia = adres ? `<a class="przycisk" href="${esc(adres)}" target="_blank" rel="noopener">${ik('wyjscie')}<span class="tx">Zobacz ogłoszenia</span></a>` : '';
     const gora = `<article class="szczegoly">${wstecz(st)}`
       + `<div class="tytul"><h1>${esc(nazwaModelu(m))}</h1><span class="drugi">${esc([m.generacja, m.lata, m.nadwozie].filter(Boolean).join(' · '))}</span></div>`
       + wersje('model', st.calosc.model) + telefonKarta(m.telefon, m.dlaczego) + wyniki(m);

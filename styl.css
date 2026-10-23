@@ -272,6 +272,9 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .kesy b { font-weight: 600; }
 .haczyk { margin: 20px 0 16px; color: var(--drugi); }
 .akcje-skrotu { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+/* Napisy tych przycisków są przycięte do wersalików, jak w pigułkach widoków, a ich rząd stoi na całym pikselu ekranu (app.js, naPiksel).
+   Bez tego napis stał do 0,6 px za wysoko (pomiar 23.10.2026). */
+.wersje .chip .tx, .akcje-skrotu .przycisk .tx { text-box: trim-both cap alphabetic; }
 
 /* ------------------------------------------------------------------ przewodnik (Typy aut) */
 .przewodnik { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
