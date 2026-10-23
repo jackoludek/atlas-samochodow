@@ -123,7 +123,9 @@ main { padding: 0 24px 48px; outline: none; }
 .uklad { max-width: 1180px; margin: 0 auto; display: grid; gap: 24px; }
 .uklad.waski { max-width: 880px; }
 .uklad.dwie { grid-template-columns: 320px minmax(0, 1fr); align-items: start; }
-.karta { background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); }
+/* overflow: clip przycina nagłówek tabeli do zaokrąglonych rogów karty, a nie robi z karty przewijanego pudełka, więc nagłówek dalej
+   przykleja się do góry okna przy przewijaniu (z overflow: hidden by się nie przyklejał). */
+.karta { background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); overflow: clip; }
 .karta-tresc { padding: 20px 24px 24px; }
 .naglowek-karty { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; padding: 20px 24px 12px; }
 .naglowek-karty h2 { margin: 0; font-size: 17px; font-weight: 600; }
@@ -134,7 +136,7 @@ h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
 p { margin: 0 0 12px; }
 
 /* soczewki (kolejność) i chipy */
-.soczewki, .chipy { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.soczewki, .chipy, .wersje { display: flex; flex-wrap: wrap; gap: 8px 16px; }
 .pasek-listy { display: none; }
 .chip {
   position: relative; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
@@ -256,6 +258,16 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .testy li:first-child { border-top: 0; }
 .zrodla { font-size: 13px; color: var(--drugi); }
 .sylwetka-duza { width: 120px; height: 48px; color: var(--tekst); }
+
+/* ------------------------------------------------------------------ skrót i całość (reguła skrot-i-wersja-pelna) */
+.przewodnik > .wersje { grid-column: 1 / -1; margin-top: 8px; }
+.przewodnik.skrot { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
+.skrot-karta .sedno { margin: 0 0 16px; font-size: 19px; font-weight: 600; line-height: 1.45; }
+.skrot-karta .sedno, .skrot-karta .kesy, .skrot-karta p { max-width: 72ch; }
+.kesy { display: grid; gap: .75em; margin: 0 0 20px; padding-left: 1.2em; line-height: 1.55; }
+.kesy b { font-weight: 600; }
+.haczyk { margin: 20px 0 16px; color: var(--drugi); }
+.akcje-skrotu { display: flex; flex-wrap: wrap; gap: 12px 16px; }
 
 /* ------------------------------------------------------------------ przewodnik (Typy aut) */
 .przewodnik { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
@@ -387,6 +399,8 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .sciaga { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
   .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
   h1 { font-size: 24px; }
+  .skrot-karta .sedno { font-size: 17px; }
+  .przewodnik > .wersje { margin-top: 0; }
 }
 /* Najwęższe telefony: cztery widoki mieszczą się dopiero przy 8 px odstępu. */
 @media (max-width: 380px) {

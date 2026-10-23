@@ -17,6 +17,10 @@
 
   const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, n]) =>
     `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}">${n}</button>`).join('') + '</div>';
+  // Wersja tekstu (reguła skrot-i-wersja-pelna): najpierw „W skrócie”, potem „Całość”. Kolejność stała, bo coś znaczy: skrót prowadzi do całości.
+  const wersje = (gdzie, calosc) => `<div class="wersje" role="radiogroup" aria-label="Wersja tekstu">`
+    + [['skrot', 'W skrócie'], ['calosc', 'Całość']].map(([k, n]) => `<button class="chip" type="button" role="radio" aria-checked="${(k === 'calosc') === calosc}" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="${k}">${n}</button>`).join('') + '</div>';
+  const czytajCalosc = (gdzie, haczyk, dalej = '') => `<p class="haczyk">${esc(haczyk)}</p><div class="akcje-skrotu"><button class="przycisk" type="button" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="calosc">Czytaj całość${ik('dalej')}</button>${dalej}</div>`;
   // Kolumny ocen w kolejności Jacka (przeciągane myszą albo Alt + strzałka na nagłówku i na pigułce, app.js), domyślnie ogółem, bezpieczeństwo, niezawodność.
   let KOL = KOLUMNY;
   const ustawKolumny = (kolejnosc) => { KOL = (kolejnosc || []).map((k) => KOLUMNY.find((x) => x[0] === k)).filter(Boolean); if (KOL.length !== KOLUMNY.length) KOL = KOLUMNY; };
@@ -116,11 +120,17 @@
   }
 
   // ---------------------------------------------------------------- Typy aut
-  function typy() {
+  function typy(st) {
     const P = A().przewodnik, S = A().stan;
+    if (!st.calosc.typy) {
+      const k = P.skrot;
+      return '<div class="przewodnik skrot">' + wersje('typy', false)
+        + `<section class="karta skrot-karta"><div class="karta-tresc"><p class="sedno">${esc(k.sedno)}</p><ul class="kesy">${k.punkty.map(([b, t]) => `<li><b>${esc(b)}:</b> ${esc(t)}</li>`).join('')}</ul>`
+        + czytajCalosc('typy', k.haczyk) + '</div></section></div>';
+    }
     const apple = P.telefony.filter((t) => /^iPhone/.test(t.t)), inne = P.telefony.filter((t) => !/^iPhone/.test(t.t));
     const wiersz = (b, o, kl = '') => `<li class="${kl}"><b>${esc(b)}</b><span class="drugi">${esc(o)}</span></li>`;
-    return '<div class="przewodnik">'
+    return '<div class="przewodnik">' + wersje('typy', true)
       + `<section class="karta szeroka"><div class="karta-tresc"><h2>Nadwozia</h2><div class="nadwozia">${P.nadwozia.map((n) => `<div class="nadwozie">${U.sylwetka(n)}<b>${esc(n.t)}</b><p>${esc(n.o)}</p>`
         + `<a href="#" data-akcja="pokaz-typ" data-typ="${n.typ}">Pokaż modele ›</a></div>`).join('')}</div></div></section>`
       + `<section class="karta"><div class="karta-tresc"><h2>Wielkość</h2><ul class="wiersze">${P.segmenty.map((s) => `<li><b>Segment ${s.s}</b><span><b>${esc(s.t)}.</b> ${esc(s.o)}<br><span class="drugi">${esc(s.p)}</span></span></li>`).join('')}</ul></div></section>`
@@ -147,16 +157,24 @@
     const adres = O.adresOtomoto(m, st.filtry);
     const zast = Object.entries(O.ZASTOSOWANIA).map(([k, t]) => (m.z[k] ? `<span>${ik('ok')}${t}</span>` : `<span class="nie">${t}</span>`)).join('');
     const seg = A().przewodnik.segmenty.find((s) => s.s === m.klasa);
-    return `<article class="szczegoly">${wstecz(st)}`
+    const ogloszenia = adres ? `<a class="przycisk" href="${esc(adres)}" target="_blank" rel="noopener">${ik('wyjscie')}Zobacz ogłoszenia</a>` : '';
+    const gora = `<article class="szczegoly">${wstecz(st)}`
       + `<div class="tytul"><h1>${esc(nazwaModelu(m))}</h1><span class="drugi">${esc([m.generacja, m.lata, m.nadwozie].filter(Boolean).join(' · '))}</span></div>`
-      + telefonKarta(m.telefon, m.dlaczego) + wyniki(m)
+      + wersje('model', st.calosc.model) + telefonKarta(m.telefon, m.dlaczego) + wyniki(m);
+    // Skrót: opis z wnioskiem, jedna zaleta i jedna wada, cena i ogłoszenia. Całość: test, ankieta, rynek, fakty, wszystkie zalety i wady, historia.
+    if (!st.calosc.model) return gora
+      + `<section class="karta karta-tresc skrot-karta"><p class="sedno">${esc(m.opis)}</p><ul class="kesy"><li><b>Zaleta:</b> ${esc(m.zalety[0])}</li><li><b>Wada:</b> ${esc(m.wady[0])}</li></ul>`
+      + `<p>${ry.ceny ? `Na Otomoto zwykle <b>${zakres(ry)}</b>${ry.przebieg ? `, przebieg zwykle ${tys(ry.przebieg)} tys. km` : ''}.` : 'Na Otomoto za mało ogłoszeń w Twoich filtrach.'}</p>`
+      + czytajCalosc('model', 'W całości: wynik testu zderzeniowego krok po kroku, ankieta usterek, wszystkie zalety i wady oraz historia modelu.', ogloszenia)
+      + '</section></article>';
+    return gora
       + '<div class="siatka-szczegolow">'
       + `<section class="karta karta-tresc"><h2>Bezpieczeństwo</h2><p>Euro NCAP ${n.rok}: ${gwiazdki(n.gw)}</p><div class="paski">${pasek('Dorośli', n.ao)}${pasek('Dzieci', n.co)}${pasek('Systemy', n.sa)}${pasek('Piesi i rowerzyści', n.vru)}</div>`
       + `${n.uwaga ? `<p class="uwaga">${esc(n.uwaga)}</p>` : ''}${n.rok < 2020 ? '<p class="uwaga">Test sprzed 2020 roku liczy się trochę słabiej, bo zasady były łagodniejsze.</p>' : ''}<a href="${esc(n.u)}" target="_blank" rel="noopener">Zobacz test na euroncap.com ↗</a></section>`
       + `<section class="karta karta-tresc"><h2>Niezawodność</h2>${m.wc ? `<div class="paski">${pasek('Bez usterek', m.wc.proc, 1)}</div><p class="uwaga">${esc(m.wc.zrodlo)}${m.szac ? '. ' + esc(m.szac) : ''}</p><a href="${esc(m.wc.url)}" target="_blank" rel="noopener">Zobacz ankietę ↗</a>` : `<p class="uwaga">${esc(m.szac)}</p>`}</section>`
       + `<section class="karta karta-tresc"><h2>Na Otomoto</h2>${ry.ceny ? `<p><b>Zwykle ${zakres(ry)}</b>, środek ${tys(ry.ceny[1])} tys. zł${ry.przebieg ? `, przebieg zwykle ${tys(ry.przebieg)} tys. km` : ''}.</p>`
         + `<p class="uwaga">${st.filtry.budzet ? `W Twoim budżecie ${ry.wBudzecie} z ${ry.ile} ogłoszeń` : `${ry.ile} ogłoszeń`} z pierwszej strony wyników, ${esc(dzien(A().stan.otomoto))}.</p>` : `<p class="uwaga">Za mało ogłoszeń w Twoich filtrach (${ry.ile} z ${ry.wszystkie}).</p>`}`
-      + (adres ? `<a class="przycisk" href="${esc(adres)}" target="_blank" rel="noopener">${ik('wyjscie')}Zobacz ogłoszenia</a>` : '') + '</section>'
+      + ogloszenia + '</section>'
       + `<section class="karta karta-tresc"><h2>Na co dzień</h2><dl class="fakty"><div><dt>Nadwozie</dt><dd>${esc(m.nadwozie)}</dd></div>`
       + (seg ? `<div><dt>Wielkość</dt><dd>segment ${esc(m.klasa)}: ${esc(seg.t.toLowerCase())}</dd></div>` : '')
       + `<div><dt>Napęd</dt><dd>${esc(O.NAPEDY[m.naped])}: ${esc(m.naped_opis)}</dd></div>`

@@ -21,16 +21,16 @@
   }
 
   // ---------------------------------------------------------------- stan i pamięć
-  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), kolumny: ['ogolem', 'bezp', 'niez'], soczewka: { marki: 'ogolem', modele: 'ogolem' }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false } });
+  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), kolumny: ['ogolem', 'bezp', 'niez'], soczewka: { marki: 'ogolem', modele: 'ogolem' }, calosc: { typy: false, model: false }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false } });
   let st = poczatek();
   try {
     const z = JSON.parse(localStorage.getItem(KLUCZ) || 'null');
-    if (z) { st = { ...st, ...z, filtry: { ...O.domyslne(), ...z.filtry }, soczewka: { ...st.soczewka, ...z.soczewka }, wszystkie: { ...st.wszystkie, ...z.wszystkie } };
+    if (z) { st = { ...st, ...z, filtry: { ...O.domyslne(), ...z.filtry }, soczewka: { ...st.soczewka, ...z.soczewka }, calosc: { ...st.calosc, ...z.calosc }, wszystkie: { ...st.wszystkie, ...z.wszystkie } };
       if (!Array.isArray(st.kolejnosc) || st.kolejnosc.length !== 4 || !st.kolejnosc.every((k) => WIDOKI[k])) st.kolejnosc = Object.keys(WIDOKI);
       if (!WIDOKI[st.widok]) st.widok = 'marki'; }
   } catch { /* pierwszy raz */ }
   st.szczegoly = null; st.edycja = null;
-  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
+  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, calosc: st.calosc, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
   const zapisz = () => { try { localStorage.setItem(KLUCZ, trwale()); } catch { /* bez pamięci */ } };
 
   // Historia operacji: zrzut stanu przed zmianą. Nowa zmiana kasuje to, co było do ponowienia.
@@ -181,6 +181,7 @@
       const d = akc.dataset;
       switch (d.akcja) {
         case 'soczewka': zmien('kolejność', () => { st.soczewka[d.gdzie] = d.soczewka; }); return;
+        case 'wersja': zmien('wersja tekstu', () => { st.calosc[d.gdzie] = d.wersja === 'calosc'; }); scrollTo(0, 0); return;
         case 'wszystkie': zmien('pokaż wszystkie', () => { st.wszystkie[d.co] = !st.wszystkie[d.co]; }); return;
         case 'filtry': otworzArkusz(); return;
         case 'zamknij-filtry': zamknijArkusz(); return;
@@ -218,7 +219,7 @@
       if (k === 'z' && !e.shiftKey) { e.preventDefault(); cofnij(); return; }
       if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); ponow(); return; }
     }
-    if (e.key === 'Escape' && !wPolu) { if (zamknijArkusz()) return; if (st.szczegoly) { history.state && history.state.atlas ? history.back() : zamknijSzczegoly(); } return; }
+    if (e.key === 'Escape' && !wPolu) { if (zamknijArkusz()) return; if (st.szczegoly) { history.state && history.state.atlas ? history.back() : zamknijSzczegoly(); return; } zamknijWKasiomobile(); return; }
     if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('tr[data-otworz]')) { e.preventDefault(); const [r, id] = t.dataset.otworz.split(':'); otworz(r, id); }
   });
   document.addEventListener('focusout', (e) => { if (e.target.matches && e.target.matches('.nazwa-zestawu') && st.edycja) zakonczEdycje(e.target, true); });
@@ -235,6 +236,16 @@
     },
     stan: () => st,
   };
+
+  // W Kasiomobile Atlas stoi w oknie pod logo (adres z ?w=kasiomobile). Escape, gdy nic w Atlasie nie jest otwarte, zamyka to okno,
+  // a Wstecz telefonu (wiadomość { atlas: 'wstecz' } od powłoki) najpierw cofa w Atlasie, a dopiero potem je zamyka.
+  const W_KASIOMOBILE = new URLSearchParams(location.search).get('w') === 'kasiomobile' && window.parent !== window;
+  function zamknijWKasiomobile() { if (W_KASIOMOBILE) window.parent.postMessage({ kasiomobile: 'zamknij-poradnik' }, '*'); }
+  if (W_KASIOMOBILE) {
+    document.body.classList.add('w-kasiomobile');
+    window.parent.postMessage({ kasiomobile: 'atlas-gotowy' }, '*');
+    addEventListener('message', (e) => { if (e.source === window.parent && e.data && e.data.atlas === 'wstecz' && !window.Atlas.wstecz()) zamknijWKasiomobile(); });
+  }
 
   rysuj();
   nowszeDane();
