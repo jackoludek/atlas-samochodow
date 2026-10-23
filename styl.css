@@ -42,6 +42,10 @@ body {
   font-feature-settings: "cv11", "ss01"; -webkit-font-smoothing: antialiased;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
 }
+/* W oknie Kasiomobile ramka stoi pod paskiem z pigułkami, który zabrał już górne wcięcie ekranu. WebKit podaje ramce te same
+   env(safe-area-inset-*) co stronie, więc na iPhonie nad tytułem stało drugi raz 47 pt pustego miejsca (symulator, 23.10.2026).
+   Boki i dół zostają: ramka sięga tam do krawędzi ekranu. */
+body.w-kasiomobile { padding-top: 0; }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: var(--link); text-decoration: none; }
