@@ -152,18 +152,18 @@
     pigulki.forEach((p, i) => { if (Math.abs(o[i]) > 0.001) p.style.top = o[i].toFixed(4) + 'px'; });
   }
   // Siatka (Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”). Pigułki kolejności na telefonie to trzy równe
-  // pigułki na całą szerokość karty listy, co 16 px (styl.css): napis tej samej wielkości we wszystkich trzech, największy od 15 px w dół,
+  // pigułki na całą szerokość karty listy, co rynnę siatki (styl.css, --rzad: 12 px, poniżej 380 px 8 px, jak w Kasiomobile): napis tej
+  // samej wielkości we wszystkich trzech, największy od 15 px w dół,
   // przy którym najdłuższy, pogrubiony, mieści się w wybranej z pierścieniem w obrysie (2 px akcentu i 2 px przerwy) i ma jeszcze
-  // 4 px tła z każdej strony, krokami po 0,5 px (przy 406 px telefonu Jacka 12 px, bo „Bezpieczeństwo” ma 14 liter). Gdy trzeba by zejść
-  // poniżej 11 px (najwęższe telefony), odstęp maleje do 8 px (klasa ciasno). Do tego wysokość wersalików musi dać się postawić na środku
+  // 4 px tła z każdej strony, krokami po 0,5 px („Bezpieczeństwo” ma 14 liter). Do tego wysokość wersalików musi dać się postawić na środku
   // pigułki co do pół piksela ekranu (pigułka minus wersaliki, w pikselach ekranu, prawie parzyste: najwyżej ćwierć piksela obok),
-  // więc napis schodzi jeszcze krokami po ćwierć piksela, gdy wypada między pikselami (412 px przy skali 3: 12 px zamiast 12,5,
-  // 320 px przy skali 1,5: 9,75 px zamiast 10). Chipy filtrów stoją po dwa w rzędzie (data-kol, Kasiomobile, 25.10.2026), a gdy któryś
+  // więc napis schodzi jeszcze krokami po ćwierć piksela, gdy wypada między pikselami (wielkość przy każdej szerokości wypisuje
+  // testy/zrzuty.js). Chipy filtrów stoją po dwa w rzędzie (data-kol, Kasiomobile, 25.10.2026), a gdy któryś
   // napis nie mieści się z 8 px z boku, jeden w rzędzie (karta filtrów na komputerze). Ukryty arkusz czeka na otwarcie.
   const NAPIS_SOCZEWEK = 15;
   function naSiatce() {
     for (const r of document.querySelectorAll('.pasek-listy .soczewki')) {
-      r.style.removeProperty('--napis'); r.classList.remove('ciasno');
+      r.style.removeProperty('--napis');
       if (!r.offsetParent || getComputedStyle(r).display !== 'grid') continue;
       const zapas = (p) => { const t = p.querySelector('.napis'), w = t && t.getBoundingClientRect().width; return w ? (p.clientWidth - 16) / w : 1; };
       const krzywo = () => { const p = r.children[0], t = p && p.querySelector('.tx'); if (!t) return false;
@@ -173,7 +173,7 @@
         r.style.setProperty('--napis', n + 'px');
         while (n > 9.5 && ([...r.children].some((p) => zapas(p) < 1) || krzywo())) { n -= 0.25; r.style.setProperty('--napis', n + 'px'); }
         return n; };
-      if (dobierz() < 11) { r.classList.add('ciasno'); dobierz(); }
+      dobierz();
     }
     for (const g of document.querySelectorAll('.chipy[data-kol]')) {
       if (!g.offsetParent) continue;

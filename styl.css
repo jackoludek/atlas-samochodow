@@ -20,9 +20,11 @@
   --nacisk: 16%; --nacisk-kursor: 24%; --pastel: 24%; --polysk-sila: 55%;
   --zasloniecie: rgba(0, 0, 0, .28);
   --odstep: 24px; --promien: 14px; --tlo: var(--strona);
-  /* Siatka (Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”): 12 kolumn, podziały 2, 3, 4 i 6, jeden
-     odstęp w rzędzie. Boki jak w Kasiomobile (--km-bok), 16 px między pigułkami i chipami w rzędzie (--rzad), 24 px między kolumnami
-     strony, a wnętrze list i kart od tej samej krawędzi (--lista-bok: 24 px, na telefonie 16 px). */
+  /* Siatka (reguła siatka-wszedzie, Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”): 12 kolumn, podziały
+     2, 3, 4 i 6, jeden odstęp w rzędzie, ten sam co rynna siatki (--rzad). Atlas w Katalagu to jeden ekran z Kasiomobile, więc bierze jego
+     siatkę: boki --km-bok, a rynna jak --km-rynna Kasiomobile, na telefonie 12 px, poniżej 380 px 8 px, więc trzy pigułki kolejności stoją
+     dokładnie nad trzema pigułkami Kasiomobile. Na komputerze 16 px w rzędzie i 24 px między kolumnami strony, a wnętrze list i kart od tej
+     samej krawędzi (--lista-bok: 24 px, na telefonie 16 px). */
   --km-bok: clamp(16px, 3vw, 28px); --rzad: 16px; --lista-bok: 24px;
   --b-niebieski: #0071e3; --b-indygo: #5856d6; --b-turkus: #30b0c7; --b-braz: #a2845e;
 }
@@ -71,10 +73,11 @@ a:hover { text-decoration: underline; }
 .gora-lewa { font-size: 13px; color: var(--drugi); min-width: 0; }
 /* Ściągi „i” nie ma nigdzie (Jacek, 25.10.2026: „Wywalamy wszędzie info”): przyciski mają podpisy albo dymki, a skróty klawiszowe
    działają dalej bez opisu. */
-.widoki { display: flex; gap: 24px; padding: 4px; }
+/* Nawigacja to jeden rząd równych pozycji (reguła siatka-wszedzie): każdy widok ma szerokość najszerszego, a kafelek z napisem stoi na środku. */
+.widoki { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 24px; padding: 4px; }
 .widok {
   --h: var(--b-niebieski); --g1: #0a84ff; --g2: #0060df;
-  position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 24px 0 16px; border: 0; border-radius: 20px;
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border: 0; border-radius: 20px;
   font-size: 14px; font-weight: 500; color: var(--tekst); white-space: nowrap; touch-action: manipulation;
   background: color-mix(in srgb, var(--h) var(--nacisk), var(--pole)); box-shadow: var(--cien);
   transition: background-color .22s cubic-bezier(.2, 0, 0, 1), box-shadow .22s cubic-bezier(.2, 0, 0, 1), transform .1s ease;
@@ -154,7 +157,7 @@ h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
 p { margin: 0 0 12px; }
 
 /* soczewki (kolejność) i chipy */
-.soczewki, .wersje { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.soczewki, .wersje { display: flex; flex-wrap: wrap; gap: 8px var(--rzad); }
 /* Chipy filtrów na siatce (Kasiomobile, 25.10.2026: „po dwa w rzędzie, równej szerokości, z napisem na środku”): po dwa w rzędzie,
    a gdy napis się nie mieści, jeden w rzędzie (app.js, naSiatce, data-kol), 16 px między chipami w poziomie i w pionie. */
 .chipy { display: grid; grid-template-columns: repeat(var(--kol, 3), minmax(0, 1fr)); gap: var(--rzad); }
@@ -194,11 +197,11 @@ p { margin: 0 0 12px; }
 .suwak::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -10px; border-radius: 50%; background: #fff; border: 0;
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .22); cursor: grab; }
 .suwak::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .22); }
-.zapis { display: flex; gap: 8px; flex-wrap: wrap; }
+.zapis { display: flex; gap: var(--rzad); flex-wrap: wrap; }
 .zapis input { flex: 1 1 160px; min-width: 0; height: 36px; padding: 0 14px; border: 0; border-radius: 18px; background: var(--strona);
   box-shadow: inset 0 0 0 1px var(--linia); font-size: 15px; }
 .zapis input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--akcent); }
-.filtry-stopka { display: flex; gap: 12px 16px; flex-wrap: wrap; }
+.filtry-stopka { display: flex; gap: 12px var(--rzad); flex-wrap: wrap; }
 
 /* ------------------------------------------------------------------ listy rankingów */
 .lista { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -295,7 +298,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .kesy { display: grid; gap: .75em; margin: 0 0 20px; padding-left: 1.2em; line-height: 1.55; }
 .kesy b { font-weight: 600; }
 .haczyk { margin: 20px 0 16px; color: var(--drugi); }
-.akcje-skrotu { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.akcje-skrotu { display: flex; flex-wrap: wrap; gap: 12px var(--rzad); }
 /* Napisy przycisków i pigułek są przycięte do wersalików, jak w pigułkach widoków, a linia pisma stoi na całym pikselu ekranu
    (app.js, naPiksel). Bez tego napis stał do 1,5 px ekranu za wysoko albo za nisko (testy\srodek.mjs, 23 i 24.10.2026). */
 .przycisk .tx, .chip .tx, .naglowek-kolumny .tx, .ocena .tx, .miejsce .tx { text-box: trim-both cap alphabetic; }
@@ -330,7 +333,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .zestaw.wylaczony .opis-zestawu { opacity: .55; }
 .zestaw .opis-zestawu b { font-weight: 600; display: block; }
 .zestaw .opis-zestawu span { font-size: 13px; color: var(--drugi); }
-.zestaw .akcje { display: flex; gap: 16px; }
+.zestaw .akcje { display: flex; gap: var(--rzad); }
 .zestaw.ciagniety { opacity: .45; }
 .zestaw.cel-przed { box-shadow: 0 -3px 0 -1px var(--akcent); }
 .przelacznik { width: 44px; height: 26px; padding: 2px; border: 0; border-radius: 13px; background: var(--pole); box-shadow: inset 0 0 0 .5px var(--wlosek); transition: background-color .2s ease; }
@@ -357,7 +360,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 @media (prefers-color-scheme: dark) { .przyklad-zestawy li { background: #1c1c1e; } }
 .przyklad-zestawy b { font-weight: 600; }
 .przyklad-zestawy .drugi { font-size: 13px; }
-.akcje-przykladu { display: flex; flex-wrap: wrap; gap: 12px 16px; padding: 20px 24px 24px; }
+.akcje-przykladu { display: flex; flex-wrap: wrap; gap: 12px var(--rzad); padding: 20px 24px 24px; }
 
 /* ------------------------------------------------------------------ Atlas w zakładce Katalag Kasiomobile (?k=katalag, od 25.10.2026) */
 /* Rząd widoków rysuje Kasiomobile (Marki i Modele), więc pasek u góry znika, a w szczegółach na telefonie zostaje z niego tylko strzałka
@@ -427,7 +430,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
    jest dla treści, a w szczegółach zostaje u góry sama strzałka Wstecz. Tytułu widoku nie ma: mówi go wybrana pigułka. */
 @media (max-width: 720px) {
   body { font-size: 16px; padding-bottom: env(safe-area-inset-bottom); }
-  :root { --lista-bok: 16px; }
+  :root { --lista-bok: 16px; --rzad: 12px; }
   .gora { display: flex; align-items: center; gap: 16px; padding: 12px var(--km-bok) 0; }
   .gora-lewa { flex: 1 1 auto; }
   body:not(.w-szczegolach) .gora-lewa, body.w-szczegolach .widoki { display: none; }
@@ -436,7 +439,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   body.w-szczegolach .gora { position: sticky; top: 0; z-index: 5; padding-bottom: 4px; background: var(--tlo); }
   body.w-szczegolach .gora::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 16px; pointer-events: none;
     background: linear-gradient(var(--tlo), transparent); }
-  .widoki { flex: 1 1 0; min-width: 0; gap: 8px; padding: 0; }
+  .widoki { flex: 1 1 0; min-width: 0; gap: var(--rzad); padding: 0; }
   .widok { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 4px; width: auto; min-width: 0; height: 56px; padding: 0 4px; border-radius: 16px; font-size: 12px; }
   /* Kafelek i napis mają razem 36 px (kafelek 24, odstęp 4, pole napisu 8, a wersaliki 8,7 px wystają z niego w górę): kafelek stoi
      10 px pod górną krawędzią, a linia pisma 46 px, więc przy skali 1,5, 3 i 4 wszystko wypada na całych pikselach ekranu. */
@@ -454,7 +457,6 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   .pasek-listy, .pasek-listy.z-filtrami { --pod: var(--tlo); display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .pasek-listy .przycisk { height: 40px; border-radius: 20px; background: var(--pole); font-size: 15px; }
   .pasek-listy .soczewki { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rzad); }
-  .pasek-listy .soczewki.ciasno { gap: 8px; }
   .pasek-listy .chip { justify-content: center; min-width: 0; padding: 0; font-size: var(--napis, 15px); background-color: var(--pole); }
   .pasek-listy .chip[aria-checked="true"] {
     background-color: color-mix(in srgb, var(--akcent) 18%, var(--karta));
@@ -502,3 +504,5 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   .pas-przykladu { padding: 20px 16px; }
   .pas-przykladu .sedno { line-height: 26px; }
 }
+/* Wąski telefon: rynna 8 px, jak --km-rynna Kasiomobile poniżej 380 px. */
+@media (max-width: 379px) { :root { --rzad: 8px; } }
