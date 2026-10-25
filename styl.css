@@ -22,8 +22,8 @@
   --odstep: 24px; --promien: 14px; --tlo: var(--strona);
   /* Siatka (reguła siatka-wszedzie, Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”): 12 kolumn, podziały
      2, 3, 4 i 6, jeden odstęp w rzędzie, ten sam co rynna siatki (--rzad). Atlas w Katalagu to jeden ekran z Kasiomobile, więc bierze jego
-     siatkę: boki --km-bok, a rynna jak --km-rynna Kasiomobile, na telefonie 12 px, poniżej 380 px 8 px, więc trzy pigułki kolejności stoją
-     dokładnie nad trzema pigułkami Kasiomobile. Na komputerze 16 px w rzędzie i 24 px między kolumnami strony, a wnętrze list i kart od tej
+     siatkę: boki --km-bok, a rynna jak --km-rynna Kasiomobile i reguła: do 759 px 8 px, więc trzy pigułki kolejności stoją
+     dokładnie nad trzema pigułkami Kasiomobile. Od 760 px 16 px w rzędzie i 24 px między kolumnami strony, a wnętrze list i kart od tej
      samej krawędzi (--lista-bok: 24 px, na telefonie 16 px). */
   --km-bok: clamp(16px, 3vw, 28px); --rzad: 16px; --lista-bok: 24px;
   --b-niebieski: #0071e3; --b-indygo: #5856d6; --b-turkus: #30b0c7; --b-braz: #a2845e;
@@ -368,6 +368,10 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
    (od 25.10.2026 pigułki Kasiomobile mówią pełną nazwą, co jest na liście), a Mój ranking i Typy aut otwierają się z karty na końcu
    listy (wiersze jak w Ustawieniach Apple). */
 body.w-katalagu { --tlo: #ffffff; padding-top: 0; }
+/* Pasek przewijania jak w stronach Kasiomobile w ramkach (html{scrollbar-width:thin;scrollbar-gutter:stable}): cienki, z miejscem
+   zarezerwowanym zawsze, więc prawa krawędź listy stoi na prawej linii siatki Kasiomobile (Kasiomobile, 25.10.2026: przy zwykłym pasku
+   lista kończyła się 5 px przed nią). Klasę na html daje app.js zaraz na początku, przed pierwszym rysowaniem. */
+html.w-katalagu { scrollbar-width: thin; scrollbar-gutter: stable; }
 @media (prefers-color-scheme: dark) { body.w-katalagu { --tlo: #000000; } }
 body.w-katalagu .gora { display: none; }
 body.w-katalagu main { padding: 24px var(--km-bok) 48px; }
@@ -421,6 +425,11 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   .uklad.dwie > .filtry-karta { display: none; }
   .pasek-listy.z-filtrami { display: flex; }
   .pasek-listy .soczewki { display: none; }
+  /* Filtry mają 3 z 12 kolumn, jak zakładka i pigułka Kasiomobile przy tej szerokości (Kasiomobile, 25.10.2026: „Ta sama szerokość dla
+     Filtrów postawi je pod pierwszą zakładką”), i wygląd pigułki jak na telefonie: 40 px, szare tło z głębią. Telefon daje im cały rząd.
+     Napis ma 16,5 px, bo wtedy wersaliki Interu mają równe 12 px i stoją w pigułce 40 px na środku co do piksela przy każdej skali
+     (przy 15 px mają 10,9 px i przy skali 1 zostawało 0,5 px ekranu obok środka). */
+  .pasek-listy .przycisk { width: calc((100% - 3 * var(--rzad)) / 4); height: 40px; border-radius: 20px; background: var(--pole); font-size: 16.5px; }
   .siatka-szczegolow, .przewodnik { grid-template-columns: 1fr; }
 }
 
@@ -430,7 +439,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
    jest dla treści, a w szczegółach zostaje u góry sama strzałka Wstecz. Tytułu widoku nie ma: mówi go wybrana pigułka. */
 @media (max-width: 720px) {
   body { font-size: 16px; padding-bottom: env(safe-area-inset-bottom); }
-  :root { --lista-bok: 16px; --rzad: 12px; }
+  :root { --lista-bok: 16px; }
   .gora { display: flex; align-items: center; gap: 16px; padding: 12px var(--km-bok) 0; }
   .gora-lewa { flex: 1 1 auto; }
   body:not(.w-szczegolach) .gora-lewa, body.w-szczegolach .widoki { display: none; }
@@ -455,7 +464,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
      ma pastel, pierścień w obrysie i smugę światła co 4 s w barwie losowanej przy starcie (app.js). Wielkość napisu dobiera naSiatce. */
   /* Filtry to inna grupa niż pigułki kolejności, więc stoją 24 px nad nimi (Kasiomobile, 25.10.2026: „z większym odstępem od nich”). */
   .pasek-listy, .pasek-listy.z-filtrami { --pod: var(--tlo); display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .pasek-listy .przycisk { height: 40px; border-radius: 20px; background: var(--pole); font-size: 15px; }
+  .pasek-listy .przycisk { width: auto; }
   .pasek-listy .soczewki { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rzad); }
   .pasek-listy .chip { justify-content: center; min-width: 0; padding: 0; font-size: var(--napis, 15px); background-color: var(--pole); }
   .pasek-listy .chip[aria-checked="true"] {
@@ -504,5 +513,5 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   .pas-przykladu { padding: 20px 16px; }
   .pas-przykladu .sedno { line-height: 26px; }
 }
-/* Wąski telefon: rynna 8 px, jak --km-rynna Kasiomobile poniżej 380 px. */
-@media (max-width: 379px) { :root { --rzad: 8px; } }
+/* Telefon i wąskie okno do 759 px: jedna rynna 8 px (reguła siatka-wszedzie, --km-rynna Kasiomobile do 759 px). Od 760 px 16 px. */
+@media (max-width: 759px) { :root { --rzad: 8px; } }

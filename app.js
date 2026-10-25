@@ -13,6 +13,8 @@
   const ADRES = new URLSearchParams(location.search);
   const W_KASIOMOBILE = ADRES.get('w') === 'kasiomobile' && window.parent !== window;
   const W_KATALAG = ADRES.get('w') === 'kasiomobile' && ADRES.get('k') === 'katalag';
+  // Cienki pasek przewijania w Katalagu (styl.css, html.w-katalagu) od razu, żeby pierwsze rysowanie liczyło już właściwą szerokość.
+  if (W_KATALAG) document.documentElement.classList.add('w-katalagu');
   const PODSTRONY = ['moj', 'typy'];
 
   // ---------------------------------------------------------------- dane: wbudowane albo nowsze z sieci
