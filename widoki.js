@@ -172,7 +172,7 @@
       + `<section class="karta"><div class="karta-tresc"><h2>Skrzynia biegów</h2><ul class="wiersze">${P.skrzynie.map((n) => wiersz(n.t, n.o)).join('')}<li><b>Ręczna</b><span class="drugi">Atlas jej nie pokazuje: szukacie automatu.</span></li></ul></div></section>`
       + `<section class="karta"><div class="karta-tresc"><h2>Zastosowanie</h2><ul class="wiersze">${P.zastosowania.map((n) => `<li><b>${esc(n.t)}</b><span class="drugi">${esc(n.o)} <a href="#" data-akcja="pokaz-zastosowanie" data-zast="${n.id}">Pokaż modele ›</a></span></li>`).join('')}</ul></div></section>`
       + `<section class="karta szeroka"><div class="karta-tresc"><h2>Jak liczymy</h2><ul class="wiersze">${P.liczenie.map((n) => `<li><b>${esc(n.t)}</b><span class="drugi">${esc(n.o)}${n.u ? ` <a href="${esc(n.u)}" target="_blank" rel="noopener">Źródło ↗</a>` : ''}</span></li>`).join('')}</ul>`
-      + `<p class="zrodla">Euro NCAP: wyniki pobrane ${esc(dzien(S.ncap))}. What Car?: ankieta ${esc(S.whatcar)}. Consumer Reports: ${esc(S.cr)}. Otomoto: ogłoszenia z ${esc(dzien(S.otomoto))}.</p></div></section>`
+      + `<p class="zrodla">Euro NCAP: wyniki pobrane ${esc(dzien(S.ncap))}. What Car?: ${/ i /.test(S.whatcar) ? 'ankiety' : 'ankieta'} ${esc(S.whatcar)}. Consumer Reports: ${esc(S.cr)}. Otomoto: ogłoszenia z ${esc(dzien(S.otomoto))}.</p></div></section>`
       + '</div>';
   }
   const dzien = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '–');
@@ -230,7 +230,7 @@
         + m.testy.map((t) => `<li><a href="${esc(t.u)}" target="_blank" rel="noopener">${esc(t.m)} · ${t.rok}</a>${gwiazdki(t.gw)}<span class="ocena" data-s="${t.w >= 85 ? '3' : t.w >= 80 ? '2' : t.w >= 70 ? '1' : '0'}"><span class="tx">${liczba(t.w)}</span></span></li>`).join('') + '</ul>'
         : '<p class="uwaga">Euro NCAP nie testowało tej marki od 2020 roku.</p>'}</section>`
       + `<section class="karta karta-tresc"><h2>Niezawodność</h2><dl class="fakty">`
-      + `<div><dt>Wielka Brytania</dt><dd>${m.wc ? `What Car? 2025: ${m.wc.miejsce}. miejsce z ${m.wc.z} (${liczba(m.wc.proc, 1)}% bez usterek)` : 'Brak w ankiecie What Car?'}</dd></div>`
+      + `<div><dt>Wielka Brytania</dt><dd>${m.wc ? `What Car?${m.wc.rok ? ' ' + m.wc.rok : ''}: ${m.wc.miejsce}. miejsce z ${m.wc.z} (${liczba(m.wc.proc, 1)}% bez usterek)` : 'Brak w ankiecie What Car?'}</dd></div>`
       + `<div><dt>USA</dt><dd>${m.cr ? `Consumer Reports 2026: ${m.cr}. miejsce` : 'Poza pierwszą czternastką Consumer Reports 2026 albo brak w ankiecie'}</dd></div></dl>`
       + `${m.niezSzac ? '<p class="uwaga">* Bez ankiety usterek: ogółem liczy średnią wszystkich marek.</p>' : ''}<p class="zrodla"><a href="${esc(A().zrodla.whatcarMarki)}" target="_blank" rel="noopener">What Car? ↗</a> · <a href="${esc(A().zrodla.cr)}" target="_blank" rel="noopener">Consumer Reports ↗</a></p></section>`
       + '</div>'
