@@ -263,7 +263,8 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .wynik .co .ikona { width: 15px; height: 15px; }
 .wynik .ile { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .wynik .ile small { font-size: 15px; font-weight: 500; color: var(--drugi); }
-.siatka-szczegolow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+/* Karty w rzędzie mają tę samą wysokość (reguła siatka-wszedzie): rząd rozciąga niższą kartę do wyższej. */
+.siatka-szczegolow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .paski { display: grid; gap: 12px; margin: 0 0 16px; }
 .pasek-w { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 3em; align-items: center; gap: 12px; font-size: 14px; }
 .pasek-w .tor { height: 6px; border-radius: 3px; background: var(--pole); overflow: hidden; }
@@ -289,9 +290,10 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 
 /* ------------------------------------------------------------------ skrót i całość (reguła skrot-i-wersja-pelna) */
 .przewodnik > .wersje { grid-column: 1 / -1; margin-top: 8px; }
-/* W skrócie i Całość: dwie pigułki równej szerokości, a na telefonie po połowie rzędu. */
-.wersje { --pod: var(--tlo); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: max-content; }
-.wersje .chip { justify-content: center; }
+/* W skrócie i Całość: dwie pigułki równej szerokości, co rynnę, razem tak szerokie jak jedna z trzech kart wyników pod nimi (karty stoją
+   co 24 px), więc prawy brzeg pary leży nad prawym brzegiem pierwszej karty. Na telefonie po połowie rzędu. */
+.wersje { --pod: var(--tlo); display: grid; grid-template-columns: repeat(2, calc(((100% - 48px) / 3 - var(--rzad)) / 2)); gap: var(--rzad); }
+.wersje .chip { justify-content: center; min-width: 0; padding: 0 8px; }
 .przewodnik.skrot { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
 .skrot-karta .sedno, .przyklad .sedno { margin: 0 0 16px; font-size: 19px; font-weight: 600; line-height: 1.45; }
 .skrot-karta .sedno, .skrot-karta .kesy, .skrot-karta p { max-width: 72ch; }
@@ -304,15 +306,18 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .przycisk .tx, .chip .tx, .naglowek-kolumny .tx, .ocena .tx, .miejsce .tx { text-box: trim-both cap alphabetic; }
 
 /* ------------------------------------------------------------------ przewodnik (Typy aut) */
-.przewodnik { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.przewodnik { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .przewodnik .szeroka { grid-column: 1 / -1; }
 /* Nadwozia na siatce 12 kolumn, każdy rząd od krawędzi do krawędzi: po trzy, a siedem jako cztery i trzy (po 3 i po 4 kolumny), bez
-   „trzech kafli i jednego z boku”. Na telefonie po dwa, a ostatnie nieparzyste na całą szerokość. */
-.nadwozia { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+   „trzech kafli i jednego z boku”. Na telefonie po dwa, a ostatnie nieparzyste na całą szerokość. Odstęp to rynna, jak między chipami. */
+.nadwozia { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--rzad); }
 .nadwozie { grid-column: span 4; }
 .nadwozia:has(> .nadwozie:nth-child(7):last-child) > .nadwozie:nth-child(-n+4) { grid-column: span 3; }
 .nadwozie { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 12px; background: var(--strona); }
-.nadwozie .sylwetka-duza { width: 150px; height: 60px; align-self: center; margin: 4px 0 8px; }
+.nadwozie .sylwetka-duza { width: 150px; max-width: 100%; height: 60px; align-self: center; margin: 4px 0 8px; }
+/* W ciemnym motywie kafel nadwozia stoi na drugim tle (#1c1c1e), jak zestawy Mojego rankingu: czerń na czarnej karcie nie dawała
+   kształtu (zrzut 25.10.2026, reguła ciemny-motyw-czarny). */
+@media (prefers-color-scheme: dark) { .nadwozie { background: #1c1c1e; } }
 .nadwozie b { font-weight: 600; }
 .nadwozie p { margin: 0; font-size: 14px; color: var(--drugi); }
 .nadwozie a { font-size: 14px; font-weight: 600; margin-top: auto; align-self: flex-start; }
@@ -378,10 +383,13 @@ body.w-katalagu main { padding: 24px var(--km-bok) 48px; }
 /* Na komputerze Atlas stoi w siatce Kasiomobile: treść najwyżej 1624 px na środku, od 1100 px kolumna filtrów 312 px i 24 px przerwy,
    a lista, podstrony i szczegóły w kolumnie pod pigułkami Kasiomobile, od tej samej krawędzi w Markach i w Modelach. */
 body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
+/* Karty marek i modeli oraz Typy aut stoją w Katalagu na całą szerokość treści, bez własnej, węższej szerokości (980, 1180 i 720 px),
+   więc ich krawędzie leżą na krawędziach siatki Kasiomobile, jak listy. Tekst w kartach i tak ma najwyżej 60–72 znaki w linii. */
+body.w-katalagu .szczegoly, body.w-katalagu .przewodnik, body.w-katalagu .przewodnik.skrot { max-width: none; }
 @media (min-width: 1101px) {
   body.w-katalagu .uklad.waski { grid-template-columns: 312px minmax(0, 1fr); }
   body.w-katalagu .uklad.waski > * { grid-column: 2; }
-  body.w-katalagu .szczegoly, body.w-katalagu .przewodnik { margin-left: calc(max(0px, (100% - 1624px) / 2) + 336px); }
+  body.w-katalagu .szczegoly, body.w-katalagu .przewodnik { margin-left: calc(max(0px, (100% - 1624px) / 2) + 336px); margin-right: max(0px, (100% - 1624px) / 2); }
 }
 .dalej-obszar { display: grid; }
 .dalej-wiersz { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; height: 56px; padding: 0 var(--lista-bok); border: 0;
@@ -495,7 +503,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   .fakty > div { grid-template-columns: 1fr; gap: 2px; }
   .wiersze li { grid-template-columns: 1fr; gap: 4px; }
   .nadwozie, .nadwozia:has(> .nadwozie:nth-child(7):last-child) > .nadwozie:nth-child(-n+4) { grid-column: span 6; }
-  .nadwozia > .nadwozie:last-child:nth-child(odd) { grid-column: 1 / -1; }  .nadwozie { padding: 16px 14px; }  .nadwozie .sylwetka-duza { width: 120px; height: 48px; }
+  .nadwozia > .nadwozie:last-child:nth-child(odd) { grid-column: 1 / -1; }  .nadwozie { padding: 16px 12px; }  .nadwozie .sylwetka-duza { width: 120px; height: 48px; }
   .zestawy { padding: 0 16px 16px; }
   .zestaw { grid-template-columns: auto minmax(0, 1fr); }
   .zestaw .akcje { grid-column: 1 / -1; justify-content: flex-end; }
@@ -507,7 +515,7 @@ body.w-katalagu .uklad, body.w-katalagu .uklad.waski { max-width: 1624px; }
   h1 { font-size: 24px; }
   .skrot-karta .sedno, .przyklad .sedno, .szczegoly .opis-marki { font-size: 17px; }
   .przewodnik > .wersje { margin-top: 0; }
-  .wersje { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; width: auto; gap: var(--rzad); }
+  .wersje { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .akcje-przykladu { padding: 16px; }
   .naglowek-karty.pas-pastel { padding: 18px 16px; }
   .pas-przykladu { padding: 20px 16px; }
