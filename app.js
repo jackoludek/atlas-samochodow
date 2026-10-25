@@ -91,8 +91,9 @@
   // na ułamku piksela. Przeglądarka rysuje linię pisma na całym pikselu strony, a przy skali 1,5 jeszcze na całym pikselu ekranu, więc
   // napis stał do 1,5 px ekranu za wysoko albo za nisko (pomiar 23 i 24.10.2026, testy\srodek.mjs). Dlatego linię pisma (dół napisu
   // przyciętego do wersalików) dosuwamy na najbliższy piksel, który jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi):
-  // rzędy przycisków odstępem nad rzędem, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
-  const RZEDY = '.widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
+  // rzędy przycisków odstępem nad rzędem, pas z kolorowym tłem (nagłówek Mojego rankingu) oboma odstępami naraz, żeby napis został
+  // na jego środku, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
+  const RZEDY = '.pas-pastel, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
   const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .karta-tresc > .przycisk';
   const gora = $('.gora');
   // Linia pisma w układzie strony, bez przewinięcia: pasek u góry od swojej krawędzi (w szczegółach się przykleja), nagłówek tabeli
@@ -118,11 +119,12 @@
     const d = window.devicePixelRatio || 1;
     // Rzędy po kolei, bo odstęp nad jednym przesuwa wszystko pod nim.
     for (const r of document.querySelectorAll(RZEDY)) {
-      r.style.paddingTop = '';
+      const pas = r.classList.contains('pas-pastel');
+      r.style.paddingTop = ''; if (pas) r.style.paddingBottom = '';
       const t = r.querySelector('.tx');
       if (!r.offsetParent || !t || !t.getClientRects().length) continue;
-      const p0 = parseFloat(getComputedStyle(r).paddingTop) || 0, y = liniaPisma(t), k = dobryPiksel(y, d, true);
-      if (k - y > 0.001) r.style.paddingTop = (p0 + k - y).toFixed(4) + 'px';
+      const cs = getComputedStyle(r), p0 = parseFloat(cs.paddingTop) || 0, p1 = parseFloat(cs.paddingBottom) || 0, y = liniaPisma(t), k = dobryPiksel(y, d, true);
+      if (k - y > 0.001) { r.style.paddingTop = (p0 + k - y).toFixed(4) + 'px'; if (pas) r.style.paddingBottom = (p1 + k - y).toFixed(4) + 'px'; }
     }
     // Pigułki na końcu i naraz: przesunięcie jednej nie rusza innych, więc najpierw wszystkie odczyty, potem wszystkie zapisy.
     const pigulki = [...document.querySelectorAll(PIGULKI)];

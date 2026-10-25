@@ -307,8 +307,18 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .przelacznik[aria-checked="true"]::before { transform: translateX(18px); }
 .nazwa-zestawu { width: 100%; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--karta); box-shadow: inset 0 0 0 2px var(--akcent); font-weight: 600; }
 
-/* ------------------------------------------------------------------ pusty Mój ranking: przykład */
-.przyklad .sedno { max-width: 60ch; margin-bottom: 24px; }
+/* ------------------------------------------------------------------ Mój ranking: nagłówek na pastelu i przykład */
+/* Nagłówek Mojego rankingu stoi na pasie w barwie pigułki widoku, turkusie (Jacek, 25.10.2026: „Nagłówek mój ranking chce więcej trochę
+   kolorków. Przezroczystych, czy tam pastelowych”): 22% barwy na bieli, w ciemnym 30% na czerni, jak wybrane zakładki Kasiomobile.
+   Napis jest przycięty do wersalików, a oba odstępy pasa rosną razem przy dosuwaniu linii pisma (app.js, naPiksel), więc stoi na środku. */
+.pas-pastel { background: color-mix(in srgb, var(--b-turkus) 22%, #ffffff); }
+@media (prefers-color-scheme: dark) { .pas-pastel { background: color-mix(in srgb, var(--b-turkus) 30%, #000000); } }
+.pas-pastel .tx { text-box: trim-both cap alphabetic; }
+.pas-pastel .licznik { color: var(--drugi-mocny); }
+.naglowek-karty.pas-pastel { padding: 18px 24px; }
+.pas-przykladu { padding: 22px 24px; }
+.pas-przykladu .sedno { margin: 0; line-height: 28px; }
+.przyklad .sedno { max-width: 60ch; }
 .przyklad .karta-tresc { padding-bottom: 4px; }
 .przyklad-zestawy { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 8px; }
 .przyklad-zestawy li { display: grid; gap: 2px; padding: 12px 16px; border-radius: 12px; background: var(--strona); }
@@ -412,4 +422,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .skrot-karta .sedno, .przyklad .sedno, .szczegoly .opis-marki { font-size: 17px; }
   .przewodnik > .wersje { margin-top: 0; }
   .akcje-przykladu { padding: 16px; }
+  .naglowek-karty.pas-pastel { padding: 18px 12px; }
+  .pas-przykladu { padding: 20px 16px; }
+  .pas-przykladu .sedno { line-height: 26px; }
 }

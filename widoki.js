@@ -110,9 +110,9 @@
   // i jedną drogę dalej. „Zacznij od tego przykładu” zapisuje te zestawy (Ctrl+Z i „Cofnij” je zdejmują).
   function przyklad() {
     const zestawy = O.przyklad(), wynik = O.rankingZestawow(A().modele, zestawy);
-    return '<div class="uklad waski"><section class="karta przyklad" aria-label="Przykład Mojego rankingu"><div class="karta-tresc">'
-      + '<p class="sedno">Zapisz w Modelach kilka zestawów filtrów, a tutaj zobaczysz auta, które wypadają najlepiej we wszystkich naraz.</p>'
-      + `<h2>Na przykład</h2><ul class="przyklad-zestawy">${zestawy.map((z) => `<li><b>${esc(z.nazwa)}</b><span class="drugi">${esc(O.nazwaZestawu(z.filtry))}</span></li>`).join('')}</ul>`
+    return '<div class="uklad waski"><section class="karta przyklad" aria-label="Przykład Mojego rankingu">'
+      + '<div class="pas-pastel pas-przykladu"><p class="sedno tx">Zapisz w Modelach kilka zestawów filtrów, a tutaj zobaczysz auta, które wypadają najlepiej we wszystkich naraz.</p></div>'
+      + `<div class="karta-tresc"><h2>Na przykład</h2><ul class="przyklad-zestawy">${zestawy.map((z) => `<li><b>${esc(z.nazwa)}</b><span class="drugi">${esc(O.nazwaZestawu(z.filtry))}</span></li>`).join('')}</ul>`
       + '<h2>Ranking z tych zestawów</h2></div>' + tabelaMoj(wynik, wynik.slice(0, 5))
       + '<div class="akcje-przykladu"><button class="przycisk glowny" type="button" data-akcja="przyklad"><span class="tx">Zacznij od tego przykładu</span></button>'
       + '<button class="przycisk" type="button" data-akcja="widok" data-widok="modele"><span class="tx">Otwórz Modele</span></button></div></section></div>';
@@ -132,7 +132,7 @@
       + '</div></div>').join('');
     // Najpierw wynik, pod nim zestawy, z których się liczy (reguła dobry-interfejs, zasada 18: wniosek to nagłówek).
     return '<div class="uklad waski">'
-      + `<section class="karta" aria-label="Mój ranking"><div class="naglowek-karty"><h2>Mediana miejsc</h2><span class="licznik">${wynik.length} ${odmiana(wynik.length, 'model', 'modele', 'modeli')}</span></div>`
+      + `<section class="karta" aria-label="Mój ranking"><div class="naglowek-karty pas-pastel"><h2 class="tx">Mediana miejsc</h2><span class="licznik">${wynik.length} ${odmiana(wynik.length, 'model', 'modele', 'modeli')}</span></div>`
       + (wynik.length ? tabelaMoj(wynik, widac) + przyciskWiecej('moj', st.wszystkie.moj, wynik.length)
         : `<div class="pusto"><p>${wlaczone.length ? 'W tych zestawach nie ma wspólnych modeli.' : 'Włącz co najmniej jeden zestaw.'}</p></div>`)
       + '<div style="height:12px"></div></section>'
