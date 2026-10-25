@@ -25,6 +25,14 @@
   const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, n]) =>
     `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}"><span class="napis" data-n="${n}"><span class="tx">${n}</span></span></button>`).join('') + '</div>';
   const pasekListy = (akt, gdzie, filtry = '') => `<div class="pasek-listy${filtry ? ' z-filtrami' : ''}">${filtry}${soczewki(akt, gdzie)}</div>`;
+  // Atlas w zakładce Katalag Kasiomobile (od 25.10.2026, ?k=katalag): rząd widoków rysuje Kasiomobile (tylko Marki i Modele), więc na górze
+  // listy stoi jedno zdanie drugim planem, a Mój ranking i Typy aut otwierają się z karty na jej końcu, jako podstrony ze strzałką Wstecz.
+  // Poza Katalagiem ani zdania, ani karty nie ma.
+  const zdanie = (st, t) => (st.katalag ? `<p class="zdanie-katalagu">${t}</p>` : '');
+  const PODSTRONY = [['moj', 'Mój ranking', 'turkus'], ['typy', 'Typy aut', 'braz']];
+  const dalej = (st) => (st.katalag ? '<nav class="karta dalej-obszar" aria-label="Więcej w Atlasie">' + PODSTRONY.map(([k, n, w]) =>
+    `<button class="dalej-wiersz" type="button" data-akcja="podstrona" data-strona="${k}" data-w="${w}"><span class="kafel">${ik(k)}</span><span class="tx">${n}</span>${ik('dalej')}</button>`).join('') + '</nav>' : '');
+  const wsteczPodstrony = (st, k) => (st.szczegoly && st.szczegoly.rodzaj === k ? wstecz(st) : '');
   // Wersja tekstu (reguła skrot-i-wersja-pelna): najpierw „W skrócie”, potem „Całość”. Kolejność stała, bo coś znaczy: skrót prowadzi do całości.
   const wersje = (gdzie, calosc) => `<div class="wersje" role="radiogroup" aria-label="Wersja tekstu">`
     + [['skrot', 'W skrócie'], ['calosc', 'Całość']].map(([k, n]) => `<button class="chip" type="button" role="radio" aria-checked="${(k === 'calosc') === calosc}" data-akcja="wersja" data-gdzie="${gdzie}" data-wersja="${k}"><span class="tx">${n}</span></button>`).join('') + '</div>';
@@ -51,11 +59,11 @@
     const wiersze = widac.map((m, i) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>${komorki(m, akt, sk)}</tr>`).join('');
     const reszta = malo.map((m) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td><span class="miejsce">–</span></td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>`
       + '<td></td></tr>').join('');
-    return `<div class="uklad waski">${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
+    return `<div class="uklad waski">${zdanie(st, 'Wszystkie marki, od najlepszej.')}${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
       + `<table class="lista">${naglowki(akt, 'marki', lista.length)}<tbody>${wiersze}</tbody></table>`
       + przyciskWiecej('marki', st.wszystkie.marki, lista.length)
       + (malo.length ? `<div class="grupa-malo">Za mało danych do rankingu</div><table class="lista malo"><tbody>${reszta}</tbody></table>` : '')
-      + '<div style="height:12px"></div></section></div>';
+      + '<div style="height:12px"></div></section>' + dalej(st) + '</div>';
   }
 
   // ---------------------------------------------------------------- filtry modeli
@@ -92,10 +100,11 @@
     const lista = wynik.length
       ? `<table class="lista">${naglowki(akt, 'modele', wynik.length, '<th class="tylko-szeroki"><span class="naglowek-kolumny">Na Otomoto</span></th>')}<tbody>${wiersze}</tbody></table>` + przyciskWiecej('modele', st.wszystkie.modele, wynik.length)
       : `<div class="pusto"><p>Żaden model nie pasuje do tych filtrów. Podnieś budżet albo zdejmij któryś filtr.</p><button class="przycisk glowny" type="button" data-akcja="domyslne"><span class="tx">Przywróć domyślne</span></button></div>`;
-    return '<div class="uklad dwie">'
+    return '<div class="uklad dwie">' + zdanie(st, 'Modele w Twoich filtrach, od najlepszego.')
       + `<aside class="karta filtry-karta" aria-label="Filtry"><div class="naglowek-karty"><h2>Filtry</h2></div><div class="karta-tresc">${filtry(f)}</div></aside>`
-      + pasekListy(akt, 'modele', `<button class="przycisk" type="button" data-akcja="filtry">${ik('filtry')}<span class="tx">Filtry${n ? ' · ' + n : ''}</span></button>`)
-      + `<section class="karta" aria-label="Ranking modeli">${lista}<div style="height:12px"></div></section></div>`;
+      // Prawa kolumna to jedna całość (pasek listy, lista i karta podstron), więc karta stoi zaraz pod listą, a nie pod wyższą kartą filtrów.
+      + '<div class="kolumna-listy">' + pasekListy(akt, 'modele', `<button class="przycisk" type="button" data-akcja="filtry">${ik('filtry')}<span class="tx">Filtry${n ? ' · ' + n : ''}</span></button>`)
+      + `<section class="karta" aria-label="Ranking modeli">${lista}<div style="height:12px"></div></section>${dalej(st)}</div></div>`;
   }
 
   // ---------------------------------------------------------------- Mój ranking
@@ -108,9 +117,9 @@
   }
   // Pusty Mój ranking pokazuje przykład (Jacek, 24.10.2026: „Mógłby dać przykład tego”): trzy zestawy, ranking, który z nich wychodzi,
   // i jedną drogę dalej. „Zacznij od tego przykładu” zapisuje te zestawy (Ctrl+Z i „Cofnij” je zdejmują).
-  function przyklad() {
+  function przyklad(nad = '') {
     const zestawy = O.przyklad(), wynik = O.rankingZestawow(A().modele, zestawy);
-    return '<div class="uklad waski"><section class="karta przyklad" aria-label="Przykład Mojego rankingu">'
+    return '<div class="uklad waski">' + nad + '<section class="karta przyklad" aria-label="Przykład Mojego rankingu">'
       + '<div class="pas-pastel pas-przykladu"><p class="sedno tx">Zapisz w Modelach kilka zestawów filtrów, a tutaj zobaczysz auta, które wypadają najlepiej we wszystkich naraz.</p></div>'
       + `<div class="karta-tresc"><h2>Na przykład</h2><ul class="przyklad-zestawy">${zestawy.map((z) => `<li><b>${esc(z.nazwa)}</b><span class="drugi">${esc(O.nazwaZestawu(z.filtry))}</span></li>`).join('')}</ul>`
       + '<h2>Ranking z tych zestawów</h2></div>' + tabelaMoj(wynik, wynik.slice(0, 5))
@@ -118,7 +127,8 @@
       + '<button class="przycisk" type="button" data-akcja="widok" data-widok="modele"><span class="tx">Otwórz Modele</span></button></div></section></div>';
   }
   function moj(st) {
-    if (!st.zestawy.length) return przyklad();
+    const nad = wsteczPodstrony(st, 'moj');
+    if (!st.zestawy.length) return przyklad(nad);
     const wlaczone = st.zestawy.filter((z) => z.wlaczony);
     const wynik = O.rankingZestawow(A().modele, wlaczone);
     const widac = st.wszystkie.moj ? wynik : wynik.slice(0, 10);
@@ -131,7 +141,7 @@
       + `<button class="okragly maly bez-ciagniecia" type="button" data-akcja="usun-zestaw" data-id="${z.id}" aria-label="Usuń zestaw" data-dymek="Usuń zestaw">${ik('usun')}</button>`
       + '</div></div>').join('');
     // Najpierw wynik, pod nim zestawy, z których się liczy (reguła dobry-interfejs, zasada 18: wniosek to nagłówek).
-    return '<div class="uklad waski">'
+    return '<div class="uklad waski">' + nad
       + `<section class="karta" aria-label="Mój ranking"><div class="naglowek-karty pas-pastel"><h2 class="tx">Mediana miejsc</h2><span class="licznik">${wynik.length} ${odmiana(wynik.length, 'model', 'modele', 'modeli')}</span></div>`
       + (wynik.length ? tabelaMoj(wynik, widac) + przyciskWiecej('moj', st.wszystkie.moj, wynik.length)
         : `<div class="pusto"><p>${wlaczone.length ? 'W tych zestawach nie ma wspólnych modeli.' : 'Włącz co najmniej jeden zestaw.'}</p></div>`)
@@ -144,12 +154,12 @@
     const P = A().przewodnik, S = A().stan;
     if (!st.calosc.typy) {
       const k = P.skrot;
-      return '<div class="przewodnik skrot">' + wersje('typy', false)
+      return '<div class="przewodnik skrot">' + wsteczPodstrony(st, 'typy') + wersje('typy', false)
         + `<section class="karta skrot-karta"><div class="karta-tresc"><p class="sedno">${esc(k.sedno)}</p><ul class="kesy">${k.punkty.map(([b, t]) => `<li><b>${esc(b)}:</b> ${esc(t)}</li>`).join('')}</ul>`
         + czytajCalosc('typy', k.haczyk) + '</div></section></div>';
     }
     const wiersz = (b, o, kl = '') => `<li class="${kl}"><b>${esc(b)}</b><span class="drugi">${esc(o)}</span></li>`;
-    return '<div class="przewodnik">' + wersje('typy', true)
+    return '<div class="przewodnik">' + wsteczPodstrony(st, 'typy') + wersje('typy', true)
       + `<section class="karta szeroka"><div class="karta-tresc"><h2>Nadwozia</h2><div class="nadwozia">${P.nadwozia.map((n) => `<div class="nadwozie">${U.sylwetka(n)}<b>${esc(n.t)}</b><p>${esc(n.o)}</p>`
         + `<a href="#" data-akcja="pokaz-typ" data-typ="${n.typ}">Pokaż modele ›</a></div>`).join('')}</div></div></section>`
       + `<section class="karta"><div class="karta-tresc"><h2>Wielkość</h2><ul class="wiersze">${P.segmenty.map((s) => `<li><b>Segment ${s.s}</b><span><b>${esc(s.t)}.</b> ${esc(s.o)}<br><span class="drugi">${esc(s.p)}</span></span></li>`).join('')}</ul></div></section>`

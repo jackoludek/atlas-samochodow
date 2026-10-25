@@ -17,7 +17,7 @@
   --s0: #ff383c; --s1: #ff8d28; --s2: #ffcc00; --s3: #34c759; --s-tekst: #1d1d1f;
   --nacisk: 16%; --nacisk-kursor: 24%; --pastel: 24%; --polysk-sila: 55%;
   --zasloniecie: rgba(0, 0, 0, .28);
-  --odstep: 24px; --promien: 14px;
+  --odstep: 24px; --promien: 14px; --tlo: var(--strona);
   --b-niebieski: #0071e3; --b-indygo: #5856d6; --b-turkus: #30b0c7; --b-braz: #a2845e;
 }
 @media (prefers-color-scheme: dark) {
@@ -39,7 +39,7 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
-  margin: 0; min-height: 100vh; background: var(--strona); color: var(--tekst);
+  margin: 0; min-height: 100vh; background: var(--tlo); color: var(--tekst);
   font: 400 clamp(15px, calc(0.4vw + 9.9px), 17px) / 1.45 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-feature-settings: "cv11", "ss01"; -webkit-font-smoothing: antialiased;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
@@ -78,9 +78,9 @@ a:hover { text-decoration: underline; }
 .widok[data-w="braz"] { --h: var(--b-braz); --g1: #c69c6d; --g2: #7f6545; }
 .widok:hover { background-color: color-mix(in srgb, var(--h) var(--nacisk-kursor), var(--pole)); transform: translateY(-1px); }
 .widok:active { transform: scale(.97); }
-.widok .kafel { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: #fff;
+.widok .kafel, .dalej-wiersz .kafel { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 7px; color: #fff;
   background: linear-gradient(180deg, var(--g1), var(--g2)); box-shadow: inset 0 .5px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .2); }
-.widok .kafel .ikona { width: 14px; height: 14px; stroke-width: 2.1; }
+.widok .kafel .ikona, .dalej-wiersz .kafel .ikona { width: 14px; height: 14px; stroke-width: 2.1; }
 .widok .napis, .chip .napis { display: grid; }
 .widok .napis > span, .widok .napis::after, .chip .napis > span, .chip .napis::after { grid-area: 1 / 1; text-box: trim-both cap alphabetic; }
 .widok .napis::after, .chip .napis::after { content: attr(data-n); font-weight: 650; visibility: hidden; }
@@ -89,7 +89,7 @@ a:hover { text-decoration: underline; }
   background-color: color-mix(in srgb, var(--h) var(--pastel), var(--karta));
   background-image: linear-gradient(105deg, transparent 38%, color-mix(in srgb, var(--polysk, #fff) var(--polysk-sila), transparent) 50%, transparent 62%);
   background-size: 260% 100%; background-repeat: no-repeat; background-position: 0 0;
-  box-shadow: var(--cien), 0 0 0 2px var(--strona), 0 0 0 4px var(--akcent), 0 4px 12px color-mix(in srgb, var(--h) 30%, transparent);
+  box-shadow: var(--cien), 0 0 0 2px var(--tlo), 0 0 0 4px var(--akcent), 0 4px 12px color-mix(in srgb, var(--h) 30%, transparent);
   animation: polysk 4s ease-in-out infinite;
 }
 body.czyta .widok[aria-selected="true"] { animation: none; }
@@ -130,6 +130,7 @@ main { padding: 0 24px 48px; outline: none; }
 .uklad { max-width: 1180px; margin: 0 auto; display: grid; gap: 24px; }
 .uklad.waski { max-width: 880px; }
 .uklad.dwie { grid-template-columns: 320px minmax(0, 1fr); align-items: start; }
+.kolumna-listy { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; min-width: 0; }
 /* overflow: clip przycina nagłówek tabeli do zaokrąglonych rogów karty, a nie robi z karty przewijanego pudełka, więc nagłówek dalej
    przykleja się do góry okna przy przewijaniu (z overflow: hidden by się nie przyklejał). */
 .karta { background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); overflow: clip; }
@@ -228,6 +229,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 
 /* ------------------------------------------------------------------ szczegóły */
 .wstecz { justify-self: start; }
+.uklad > .wstecz, .przewodnik > .wstecz { grid-column: 1 / -1; }
 .szczegoly { max-width: 980px; margin: 0 auto; display: grid; gap: 24px; }
 .szczegoly .tytul { display: grid; gap: 8px; }
 .szczegoly .tytul .drugi { font-size: 15px; }
@@ -330,6 +332,28 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .przyklad-zestawy .drugi { font-size: 13px; }
 .akcje-przykladu { display: flex; flex-wrap: wrap; gap: 12px 16px; padding: 20px 24px 24px; }
 
+/* ------------------------------------------------------------------ Atlas w zakładce Katalag Kasiomobile (?k=katalag, od 25.10.2026) */
+/* Rząd widoków rysuje Kasiomobile nad ramką (Marki i Modele), więc pasek u góry znika, a w szczegółach na telefonie zostaje z niego tylko
+   strzałka Wstecz. Tło jak w zakładkach Kasiomobile (biel, w ciemnym czerń), boki jak tam (--km-bok), bez górnego wcięcia, na górze listy
+   zdanie drugim planem, a Mój ranking i Typy aut otwierają się z karty na końcu listy (wiersze jak w Ustawieniach Apple). */
+body.w-katalagu { --tlo: #ffffff; --km-bok: clamp(16px, 3vw, 28px); padding-top: 0; }
+@media (prefers-color-scheme: dark) { body.w-katalagu { --tlo: #000000; } }
+body.w-katalagu .gora { display: none; }
+body.w-katalagu main { padding: 24px var(--km-bok) 48px; }
+.zdanie-katalagu { margin: 0; font-size: 15px; line-height: 1.4; color: var(--drugi); }
+.uklad.dwie > .zdanie-katalagu { grid-column: 1 / -1; }
+.dalej-obszar { display: grid; }
+.dalej-wiersz { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; height: 56px; padding: 0 16px; border: 0;
+  background: none; font-size: 16px; font-weight: 600; color: var(--link); text-align: left; touch-action: manipulation; }
+.dalej-wiersz + .dalej-wiersz::before { content: ""; position: absolute; top: 0; left: 52px; right: 0; height: 1px; background: var(--linia); }
+.dalej-wiersz .tx { flex: 1 1 auto; text-box: trim-both cap alphabetic; }
+.dalej-wiersz > .ikona:last-child { width: 16px; height: 16px; color: var(--drugi); }
+.dalej-wiersz:hover { background: var(--pod-kursorem); }
+.dalej-wiersz:active { background: color-mix(in srgb, var(--akcent) 14%, var(--karta)); }
+.dalej-wiersz:focus-visible { outline-offset: -2px; }
+.dalej-wiersz[data-w="turkus"] { --g1: #40c8e0; --g2: #0071a4; }
+.dalej-wiersz[data-w="braz"] { --g1: #c69c6d; --g2: #7f6545; }
+
 /* ------------------------------------------------------------------ arkusz filtrów (telefon), dymek, toast */
 .arkusz-tlo { position: fixed; inset: 0; z-index: 20; background: var(--zasloniecie); }
 .filtry-arkusz { position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; max-height: 88vh; display: flex; flex-direction: column;
@@ -371,9 +395,9 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   body:not(.w-szczegolach) .gora-lewa, body.w-szczegolach .widoki { display: none; }
   /* W szczegółach strzałka Wstecz zostaje u góry przy przewijaniu, a treść pod nią miękko gaśnie (jak krawędź przewijania w iOS),
      bez paska i kreski. Przez wygaszenie da się stukać w to, co pod nim. */
-  body.w-szczegolach .gora { position: sticky; top: 0; z-index: 5; padding-bottom: 4px; background: var(--strona); }
+  body.w-szczegolach .gora { position: sticky; top: 0; z-index: 5; padding-bottom: 4px; background: var(--tlo); }
   body.w-szczegolach .gora::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 16px; pointer-events: none;
-    background: linear-gradient(var(--strona), transparent); }
+    background: linear-gradient(var(--tlo), transparent); }
   .widoki { flex: 1 1 0; min-width: 0; gap: 8px; padding: 0; }
   .widok { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 4px; width: auto; min-width: 0; height: 56px; padding: 0 4px; border-radius: 16px; font-size: 12px; }
   /* Kafelek i napis mają razem 36 px (kafelek 24, odstęp 4, pole napisu 8, a wersaliki 8,7 px wystają z niego w górę): kafelek stoi
@@ -381,14 +405,16 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .widok .napis { display: grid; height: 8px; align-content: end; }
   .widok:hover { transform: none; }
   main { padding: 16px 12px 32px; }
-  .uklad, .szczegoly { gap: 16px; }
+  body.w-katalagu main { padding: 16px var(--km-bok) 32px; }
+  body.w-katalagu.w-szczegolach .gora { display: flex; padding-left: var(--km-bok); padding-right: var(--km-bok); }
+  .uklad, .szczegoly, .kolumna-listy { gap: 16px; }
   /* Kolumna ma szerokość ekranu, a nie treści: inaczej rząd pigułek rozpycha stronę, zamiast zmaleć (pomiar 24.10.2026: 407 px przy 320). */
   .uklad, .uklad.dwie { grid-template-columns: minmax(0, 1fr); }
   .pasek-listy, .pasek-listy.z-filtrami { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .pasek-listy .przycisk { justify-self: start; height: 40px; border-radius: 20px; }
   .pasek-listy .soczewki { display: flex; flex-wrap: nowrap; gap: 8px; }
   .pasek-listy .chip { flex: 1 0 auto; justify-content: center; padding: 0 var(--bok, 16px); font-size: var(--napis, 15px); background: var(--przycisk); }
-  .pasek-listy .chip[aria-checked="true"] { background: color-mix(in srgb, var(--akcent) 18%, var(--karta)); box-shadow: var(--cien), 0 0 0 2px var(--strona), 0 0 0 4px var(--akcent); }
+  .pasek-listy .chip[aria-checked="true"] { background: color-mix(in srgb, var(--akcent) 18%, var(--karta)); box-shadow: var(--cien), 0 0 0 2px var(--tlo), 0 0 0 4px var(--akcent); }
   .naglowek-karty { padding: 16px 12px 12px; }
   .karta-tresc { padding: 16px; }
   .lista th { display: none; }
@@ -401,7 +427,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 
   .tytul-widoku { display: block; }
   .tytul-widoku .przycisk { position: relative; font-size: 15px; }
-  .szczegoly > .wstecz { display: none; }
+  .szczegoly > .wstecz, .uklad > .wstecz, .przewodnik > .wstecz { display: none; }
   .przewodnik a, .szczegoly a:not(.przycisk) { min-height: 44px; }
   .wyniki { grid-template-columns: 1fr; gap: 0; background: var(--karta); border-radius: var(--promien); box-shadow: var(--cien-karty); overflow: hidden; }
   .wyniki .wynik { display: flex; align-items: baseline; justify-content: space-between; border-radius: 0; box-shadow: none; padding: 12px 16px; border-top: 1px solid var(--linia); }

@@ -7,6 +7,13 @@
   const KLUCZ = 'atlas-samochodow:stan', KLUCZ_DANYCH = 'atlas-samochodow:dane';
   const ZDALNE = 'https://jackoludek.github.io/atlas-samochodow/dane.json';
   const WIDOKI = { marki: ['Marki', 'marki', 'niebieski'], modele: ['Modele', 'modele', 'indygo'], moj: ['Mój ranking', 'moj', 'turkus'], typy: ['Typy aut', 'typy', 'braz'] };
+  // Osadzenie w Kasiomobile: ?w=kasiomobile to Atlas w ramce (od 23.10.2026), a ?w=kasiomobile&k=katalag&widok=marki|modele to Atlas
+  // w zakładce Katalag (od 25.10.2026): rząd widoków rysuje wtedy Kasiomobile nad ramką, a Mój ranking i Typy aut są podstronami
+  // otwieranymi z wierszy na końcu listy. Bez k=katalag Atlas działa jak wcześniej, bo stare paczki Kasiomobile otwierają go tak dalej.
+  const ADRES = new URLSearchParams(location.search);
+  const W_KASIOMOBILE = ADRES.get('w') === 'kasiomobile' && window.parent !== window;
+  const W_KATALAG = ADRES.get('w') === 'kasiomobile' && ADRES.get('k') === 'katalag';
+  const PODSTRONY = ['moj', 'typy'];
 
   // ---------------------------------------------------------------- dane: wbudowane albo nowsze z sieci
   try { const z = JSON.parse(localStorage.getItem(KLUCZ_DANYCH) || 'null'); if (z && z.zbudowano > window.ATLAS.zbudowano) window.ATLAS = z; } catch { /* zostają wbudowane */ }
@@ -30,6 +37,9 @@
       if (!WIDOKI[st.widok]) st.widok = 'marki'; }
   } catch { /* pierwszy raz */ }
   st.szczegoly = null; st.edycja = null;
+  // W Katalagu widok to Marki albo Modele z adresu. st.katalag mówi widokom o zdaniu na górze i wierszach podstron; nie trafia do pamięci.
+  if (W_KATALAG) { const w0 = ADRES.get('widok'); st.widok = w0 === 'marki' || w0 === 'modele' ? w0 : st.widok === 'modele' ? 'modele' : 'marki'; st.katalag = true; }
+  let widokRodzica = st.widok;
   const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, calosc: st.calosc, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
   const zapisz = () => { try { localStorage.setItem(KLUCZ, trwale()); } catch { /* bez pamięci */ } };
 
@@ -70,12 +80,12 @@
     // Na telefonie szczegóły mają u góry samą strzałkę Wstecz, a lista same widoki (styl.css, część „telefon”).
     document.body.classList.toggle('w-szczegolach', Boolean(d));
     tresc.setAttribute('aria-labelledby', 'tab-' + st.widok);
-    tresc.innerHTML = d ? (d.rodzaj === 'model' ? W.model(st, d.id) : W.marka(st, d.id)) : W[st.widok](st);
+    tresc.innerHTML = d ? (d.rodzaj === 'model' ? W.model(st, d.id) : d.rodzaj === 'marka' ? W.marka(st, d.id) : W[d.rodzaj](st)) : W[st.widok](st);
     const nazwyWidokow = { marki: 'Marki', modele: 'Modele', moj: 'Mój ranking', typy: 'Typy aut' };
     $('#tytul-widoku').innerHTML = d ? `<button class="przycisk" type="button" data-akcja="wstecz">${ik('wstecz')}<span class="tx">${esc(nazwyWidokow[d.skad] || 'Wstecz')}</span></button>` : '';
     document.title = d ? `${tytulSzczegolow(d)} · Atlas Samochodów` : `${WIDOKI[st.widok][0]} · Atlas Samochodów`;
     if (!$('#filtry-arkusz').hidden) rysujArkusz();
-    if (st.widok === 'moj' && !d) { const z = $('#zestawy'); if (z) U.przeciagalne(z, '.zestaw', { os: 'y', poZmianie: (ids, fokus) => zmien('kolejność zestawów', () => { st.zestawy = ids.map((id) => st.zestawy.find((x) => x.id === id)); }) || fokusuj(fokus) }); }
+    if (d ? d.rodzaj === 'moj' : st.widok === 'moj') { const z = $('#zestawy'); if (z) U.przeciagalne(z, '.zestaw', { os: 'y', poZmianie: (ids, fokus) => zmien('kolejność zestawów', () => { st.zestawy = ids.map((id) => st.zestawy.find((x) => x.id === id)); }) || fokusuj(fokus) }); }
     const glowka = !d && tresc.querySelector('.lista thead tr');
     // Kolumny ocen przestawia nagłówek tabeli i pigułki kolejności (telefon; przeciąga tylko mysz): jedna kolejność w st.kolumny.
     const kolumny = (kontener, sel, cel) => U.przeciagalne(kontener, sel, { os: 'x', poZmianie: (ids, fokus) => { zmien('kolejność kolumn', () => { st.kolumny = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(cel(fokus)); if (b) b.focus(); }); } });
@@ -85,6 +95,9 @@
     uloz();
     if (przewin != null) scrollTo(0, przewin);
     if (sel && !st.edycja && !document.activeElement.closest?.('.zapis')) { const e = (wArkuszu && arkusz.querySelector(sel)) || document.querySelector(sel); if (e && e !== document.activeElement) e.focus({ preventScroll: true }); }
+    // W Katalagu Atlas zmienia widok sam tylko z podstron („Pokaż ten zestaw w Modelach”, „Pokaż modele ›”, „Otwórz Modele”) i z Ctrl+Z:
+    // mówi wtedy Kasiomobile, który widok stoi, żeby zaznaczyło swoją pigułkę.
+    if (W_KATALAG && W_KASIOMOBILE && st.widok !== widokRodzica) { widokRodzica = st.widok; window.parent.postMessage({ kasiomobile: 'atlas-widok', widok: st.widok }, '*'); }
   }
   const fokusuj = (id) => id && requestAnimationFrame(() => { const e = document.querySelector(`[data-id="${id}"]`); if (e) e.focus(); });
   // Napisy przycisków i pigułek są przycięte do wersalików (.tx), więc stoją na środku, ale w tekście, który płynie, zwykle wypadają
@@ -93,8 +106,8 @@
   // przyciętego do wersalików) dosuwamy na najbliższy piksel, który jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi):
   // rzędy przycisków odstępem nad rzędem, pas z kolorowym tłem (nagłówek Mojego rankingu) oboma odstępami naraz, żeby napis został
   // na jego środku, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
-  const RZEDY = '.pas-pastel, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
-  const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .karta-tresc > .przycisk';
+  const RZEDY = '.pas-pastel, .dalej-obszar, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
+  const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .uklad > .wstecz, .przewodnik > .wstecz, .karta-tresc > .przycisk';
   const gora = $('.gora');
   // Linia pisma w układzie strony, bez przewinięcia: pasek u góry od swojej krawędzi (w szczegółach się przykleja), nagłówek tabeli
   // od tabeli (też się przykleja), arkusz filtrów od okna (stoi na stałe) razem z przewinięciem swojego środka, reszta od początku strony.
@@ -151,29 +164,36 @@
   if (document.fonts) document.fonts.ready.then(uloz);
   function tytulSzczegolow(d) {
     const A = window.ATLAS;
+    if (PODSTRONY.includes(d.rodzaj)) return WIDOKI[d.rodzaj][0];
     if (d.rodzaj === 'model') { const m = A.modele.find((x) => x.id === d.id); return m ? `${m.marka} ${m.model}` : ''; }
     const m = A.marki.find((x) => x.id === d.id); return m ? m.nazwa : '';
   }
 
   // ---------------------------------------------------------------- nawigacja
-  function widok(k) { if (!WIDOKI[k]) return; zamknijSzczegoly(true); if (st.widok !== k) { st.widok = k; zapisz(); } rysuj({ przewin: 0 }); }
+  function widok(k) { if (!WIDOKI[k]) return; zamknijWszystko(); if (st.widok !== k) { st.widok = k; zapisz(); } rysuj({ przewin: 0 }); }
+  // Szczegóły i podstrony (Mój ranking, Typy aut w Katalagu) stoją jedne na drugich: model otwarty z podstrony wraca Wsteczem na nią,
+  // a podstrona na listę. Model otwarty z modelu albo marki zastępuje poprzedni, jak wcześniej.
   function otworz(rodzaj, id) {
-    const skad = st.szczegoly ? st.szczegoly.skad : st.widok;
-    const przewiniecie = st.szczegoly ? st.szczegoly.przewiniecie : scrollY;
-    if (!st.szczegoly) history.pushState({ atlas: 1 }, '', '#' + rodzaj + '/' + id);
-    else history.replaceState({ atlas: 1 }, '', '#' + rodzaj + '/' + id);
-    st.szczegoly = { rodzaj, id, skad, przewiniecie };
+    const z = st.szczegoly, zPodstrony = Boolean(z && PODSTRONY.includes(z.rodzaj));
+    if (!z || zPodstrony) {
+      history.pushState({ atlas: 1 }, '', '#' + rodzaj + '/' + id);
+      st.szczegoly = { rodzaj, id, skad: z ? z.rodzaj : st.widok, przewiniecie: scrollY, poprzednie: z || null };
+    } else {
+      history.replaceState({ atlas: 1 }, '', '#' + rodzaj + '/' + id);
+      st.szczegoly = { rodzaj, id, skad: z.skad, przewiniecie: z.przewiniecie, poprzednie: z.poprzednie };
+    }
     rysuj({ przewin: 0 }); tresc.focus({ preventScroll: true });
   }
   function zamknijSzczegoly(cicho) {
     if (!st.szczegoly) return false;
-    const p = st.szczegoly.przewiniecie;
-    st.szczegoly = null;
-    if (history.state && history.state.atlas) history.replaceState(null, '', location.pathname + location.search);
-    if (!cicho) rysuj({ przewin: p });
+    const z = st.szczegoly;
+    st.szczegoly = z.poprzednie || null;
+    if (!st.szczegoly && history.state && history.state.atlas) history.replaceState(null, '', location.pathname + location.search);
+    if (!cicho) rysuj({ przewin: z.przewiniecie });
     return true;
   }
-  addEventListener('popstate', () => { if (st.szczegoly) { const p = st.szczegoly.przewiniecie; st.szczegoly = null; rysuj({ przewin: p }); } });
+  function zamknijWszystko() { while (st.szczegoly) zamknijSzczegoly(true); }
+  addEventListener('popstate', () => { if (st.szczegoly) { const z = st.szczegoly; st.szczegoly = z.poprzednie || null; rysuj({ przewin: z.przewiniecie }); } });
 
   // ---------------------------------------------------------------- arkusz filtrów (telefon i wąskie okno)
   function rysujArkusz() {
@@ -250,13 +270,14 @@
         case 'zapisz-zestaw': zapiszZestaw(akc.closest('.zapis').querySelector('input')); return;
         case 'przelacz-zestaw': zmien('zestaw w rankingu', () => { const z = st.zestawy.find((x) => x.id === d.id); z.wlaczony = !z.wlaczony; }); fokusuj(d.id); return;
         case 'zmien-nazwe': st.edycja = d.id; rysuj(); return;
-        case 'otworz-zestaw': { const z = st.zestawy.find((x) => x.id === d.id); zmien('filtry z zestawu', () => { st.filtry = JSON.parse(JSON.stringify(z.filtry)); st.soczewka.modele = z.soczewka || 'ogolem'; st.widok = 'modele'; }); scrollTo(0, 0); return; }
+        case 'podstrona': e.preventDefault(); otworz(d.strona, ''); return;
+        case 'otworz-zestaw': { const z = st.zestawy.find((x) => x.id === d.id); zamknijWszystko(); zmien('filtry z zestawu', () => { st.filtry = JSON.parse(JSON.stringify(z.filtry)); st.soczewka.modele = z.soczewka || 'ogolem'; st.widok = 'modele'; }); rysuj({ przewin: 0 }); return; }
         case 'usun-zestaw': { const z = st.zestawy.find((x) => x.id === d.id); zmien('usunięcie zestawu', () => { st.zestawy = st.zestawy.filter((x) => x.id !== d.id); }, { komunikat: `Usunięty zestaw „${z.nazwa}”` }); return; }
         case 'przyklad': { const t = Date.now().toString(36); zmien('przykładowe zestawy', () => { st.zestawy = O.przyklad().map((z, i) => ({ id: 'z' + t + i, nazwa: z.nazwa, filtry: z.filtry, soczewka: z.soczewka, wlaczony: true })); }, { komunikat: 'Zapisane trzy przykładowe zestawy' }); return; }
         case 'widok': widok(d.widok); return;
         case 'wstecz': e.preventDefault(); history.state && history.state.atlas ? history.back() : zamknijSzczegoly(); return;
-        case 'pokaz-typ': e.preventDefault(); zmien('filtr nadwozia', () => { st.filtry.typy = [d.typ]; st.widok = 'modele'; }); scrollTo(0, 0); return;
-        case 'pokaz-zastosowanie': e.preventDefault(); zmien('filtr zastosowania', () => { st.filtry.zastosowanie = d.zast; st.widok = 'modele'; }); scrollTo(0, 0); return;
+        case 'pokaz-typ': e.preventDefault(); zamknijWszystko(); zmien('filtr nadwozia', () => { st.filtry.typy = [d.typ]; st.widok = 'modele'; }); rysuj({ przewin: 0 }); return;
+        case 'pokaz-zastosowanie': e.preventDefault(); zamknijWszystko(); zmien('filtr zastosowania', () => { st.filtry.zastosowanie = d.zast; st.widok = 'modele'; }); rysuj({ przewin: 0 }); return;
       }
     }
     if (fil) { przelaczFiltr(fil); return; }
@@ -287,25 +308,31 @@
   document.addEventListener('focusout', (e) => { if (e.target.matches && e.target.matches('.nazwa-zestawu') && st.edycja) zakonczEdycje(e.target, true); });
   ciemny.addEventListener('change', () => { pasek.innerHTML = ''; rysuj(); });
 
-  // Wstecz telefonu (przez Kasiomobile) najpierw zamyka arkusz filtrów i szczegóły, potem wraca do pierwszego widoku, dopiero potem wychodzi.
+  // Wstecz telefonu (przez Kasiomobile) najpierw zamyka arkusz filtrów, potem szczegóły i podstrony po jednej, potem (poza Katalagiem,
+  // gdzie widoki są w Kasiomobile) wraca do pierwszego widoku, a dopiero potem wychodzi.
   window.Atlas = {
     wstecz() {
       if (zamknijArkusz()) return true;
       if (st.szczegoly) { zamknijSzczegoly(); return true; }
-      if (st.widok !== st.kolejnosc[0]) { widok(st.kolejnosc[0]); return true; }
+      if (!W_KATALAG && st.widok !== st.kolejnosc[0]) { widok(st.kolejnosc[0]); return true; }
       return false;
     },
     stan: () => st,
   };
 
-  // W Kasiomobile Atlas stoi w oknie pod logo (adres z ?w=kasiomobile). Escape, gdy nic w Atlasie nie jest otwarte, zamyka to okno,
-  // a Wstecz telefonu (wiadomość { atlas: 'wstecz' } od powłoki) najpierw cofa w Atlasie, a dopiero potem je zamyka.
-  const W_KASIOMOBILE = new URLSearchParams(location.search).get('w') === 'kasiomobile' && window.parent !== window;
+  // W Kasiomobile Atlas stoi w ramce (adres z ?w=kasiomobile). Escape, gdy nic w Atlasie nie jest otwarte, mówi powłoce „zamknij”,
+  // a Wstecz telefonu (wiadomość { atlas: 'wstecz' } od powłoki) najpierw cofa w Atlasie, a dopiero potem mówi „zamknij”. W Katalagu
+  // { atlas: 'widok', widok: 'marki' | 'modele' } przełącza widok bez wczytywania strony od nowa i przewija na górę.
   function zamknijWKasiomobile() { if (W_KASIOMOBILE) window.parent.postMessage({ kasiomobile: 'zamknij-poradnik' }, '*'); }
+  if (W_KATALAG) document.body.classList.add('w-katalagu');
   if (W_KASIOMOBILE) {
     document.body.classList.add('w-kasiomobile');
     window.parent.postMessage({ kasiomobile: 'atlas-gotowy' }, '*');
-    addEventListener('message', (e) => { if (e.source === window.parent && e.data && e.data.atlas === 'wstecz' && !window.Atlas.wstecz()) zamknijWKasiomobile(); });
+    addEventListener('message', (e) => {
+      if (e.source !== window.parent || !e.data) return;
+      if (e.data.atlas === 'wstecz' && !window.Atlas.wstecz()) zamknijWKasiomobile();
+      if (W_KATALAG && e.data.atlas === 'widok' && (e.data.widok === 'marki' || e.data.widok === 'modele')) { widokRodzica = e.data.widok; arkusz.hidden = true; tlo.hidden = true; widok(e.data.widok); }
+    });
   }
 
   // Nowa wersja w sieci (od 25.10.2026): Atlas w ramce Kasiomobile i w karcie przeglądarki stoi otwarty godzinami, a Kasiomobile ładuje go
@@ -324,7 +351,7 @@
       if (!/^[0-9a-f]{12}$/.test(nowa) || nowa === WERSJA) return;
       const klucz = 'atlas-samochodow:odswiezenie';
       try { const z = JSON.parse(sessionStorage.getItem(klucz) || '{}'); if (z.w === nowa && Date.now() - z.t < 15 * 60000) return; sessionStorage.setItem(klucz, JSON.stringify({ w: nowa, t: Date.now() })); } catch { return; }
-      const p = new URLSearchParams(location.search); p.set('v', nowa);
+      const p = new URLSearchParams(location.search); p.set('v', nowa); if (W_KATALAG) p.set('widok', st.widok);
       location.replace(location.pathname + '?' + p);
     }).catch(() => { /* bez sieci zostaje ta wersja */ });
   }
