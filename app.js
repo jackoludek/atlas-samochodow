@@ -62,6 +62,9 @@
   // ---------------------------------------------------------------- rysowanie
   const tresc = $('#tresc'), pasek = $('#widoki'), arkusz = $('#filtry-arkusz'), tlo = $('#arkusz-tlo');
   const ciemny = matchMedia('(prefers-color-scheme: dark)');
+  // Smuga światła na wybranej pigułce kolejności: barwa losowana przy starcie, jak w widokach (ui.js, polysk), daleko od akcentu.
+  const polyskStrony = () => U.polysk(document.body, getComputedStyle(document.documentElement).getPropertyValue('--akcent').trim() || '#0071e3', ciemny.matches);
+  polyskStrony();
   function rysujPasek() {
     const istniejace = [...pasek.children].map((b) => b.dataset.id).join();
     if (istniejace !== st.kolejnosc.join()) {
@@ -109,7 +112,7 @@
   // przyciętego do wersalików) dosuwamy na najbliższy piksel, który jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi):
   // rzędy przycisków odstępem nad rzędem, pas z kolorowym tłem (nagłówek Mojego rankingu) oboma odstępami naraz, żeby napis został
   // na jego środku, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
-  const RZEDY = '.pas-pastel, .dalej-obszar, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
+  const RZEDY = '.pas-pastel, .dalej-obszar, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .etykieta, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
   const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .uklad > .wstecz, .przewodnik > .wstecz, .karta-tresc > .przycisk';
   const gora = $('.gora');
   // Linia pisma w układzie strony, bez przewinięcia: pasek u góry od swojej krawędzi (w szczegółach się przykleja), nagłówek tabeli
@@ -148,21 +151,43 @@
     const o = pigulki.map((p) => { const t = p.querySelector('.tx'); if (!t || !t.getClientRects().length) return 0; const y = liniaPisma(t); return dobryPiksel(y, d, false) - y; });
     pigulki.forEach((p, i) => { if (Math.abs(o[i]) > 0.001) p.style.top = o[i].toFixed(4) + 'px'; });
   }
-  // Pigułki kolejności na telefonie stoją w jednym rzędzie (Jacek, 24.10.2026: „to musi być w linii”), jak pigułki ocen w Rankingu AI:
-  // napis tej samej wielkości we wszystkich trzech, największy do 15 px, przy którym każda ma 16 px tła z każdej strony, krokami po 0,5 px,
-  // najmniej 13 px. Gdy i to za mało (najwęższe telefony), maleje tło po bokach, najmniej do 10 px, a na końcu napis do 12 px.
-  const KROKI_RZEDU = [15, 14.5, 14, 13.5, 13].map((n) => [n, 16]).concat([[13, 14], [13, 12], [13, 10], [12.5, 10], [12, 10]]);
-  function wJednymRzedzie() {
-    for (const r of tresc.querySelectorAll('.pasek-listy .soczewki')) {
-      r.style.removeProperty('--napis'); r.style.removeProperty('--bok');
-      if (!r.offsetParent || getComputedStyle(r).flexWrap !== 'nowrap') continue;
-      for (const [n, b] of KROKI_RZEDU) {
-        r.style.setProperty('--napis', n + 'px'); r.style.setProperty('--bok', b + 'px');
-        if (r.scrollWidth <= r.clientWidth) break;
+  // Siatka (Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”). Pigułki kolejności na telefonie to trzy równe
+  // pigułki na całą szerokość karty listy, co 16 px (styl.css): napis tej samej wielkości we wszystkich trzech, największy od 15 px w dół,
+  // przy którym najdłuższy, pogrubiony, mieści się w wybranej z pierścieniem w obrysie (2 px akcentu i 2 px przerwy) i ma jeszcze
+  // 4 px tła z każdej strony, krokami po 0,5 px (przy 406 px telefonu Jacka 12 px, bo „Bezpieczeństwo” ma 14 liter). Gdy trzeba by zejść
+  // poniżej 11 px (najwęższe telefony), odstęp maleje do 8 px (klasa ciasno). Do tego wysokość wersalików musi dać się postawić na środku
+  // pigułki co do pół piksela ekranu (pigułka minus wersaliki, w pikselach ekranu, prawie parzyste: najwyżej ćwierć piksela obok),
+  // więc napis schodzi jeszcze krokami po ćwierć piksela, gdy wypada między pikselami (412 px przy skali 3: 12 px zamiast 12,5,
+  // 320 px przy skali 1,5: 9,75 px zamiast 10). Chipy filtrów stoją po tyle
+  // w rzędzie, ile mówi pierwsza liczba z data-kol, przy której każdy napis mieści się z 8 px z boku; inaczej następna liczba (po trzy
+  // albo po dwa, potem jeden w rzędzie). Ukryty arkusz czeka na otwarcie.
+  const NAPIS_SOCZEWEK = 15;
+  function naSiatce() {
+    for (const r of document.querySelectorAll('.pasek-listy .soczewki')) {
+      r.style.removeProperty('--napis'); r.classList.remove('ciasno');
+      if (!r.offsetParent || getComputedStyle(r).display !== 'grid') continue;
+      const zapas = (p) => { const t = p.querySelector('.napis'), w = t && t.getBoundingClientRect().width; return w ? (p.clientWidth - 16) / w : 1; };
+      const krzywo = () => { const p = r.children[0], t = p && p.querySelector('.tx'); if (!t) return false;
+        const x = (p.getBoundingClientRect().height - t.getBoundingClientRect().height) * (devicePixelRatio || 1) / 2; return Math.abs(x - Math.round(x)) > 0.25; };
+      const dobierz = () => { r.style.setProperty('--napis', NAPIS_SOCZEWEK + 'px');
+        let n = Math.max(10, Math.min(NAPIS_SOCZEWEK, Math.floor(NAPIS_SOCZEWEK * Math.min(...[...r.children].map(zapas)) * 2) / 2));
+        r.style.setProperty('--napis', n + 'px');
+        while (n > 9.5 && ([...r.children].some((p) => zapas(p) < 1) || krzywo())) { n -= 0.25; r.style.setProperty('--napis', n + 'px'); }
+        return n; };
+      if (dobierz() < 11) { r.classList.add('ciasno'); dobierz(); }
+    }
+    for (const g of document.querySelectorAll('.chipy[data-kol]')) {
+      if (!g.offsetParent) continue;
+      for (const k of g.dataset.kol.split(' ').map(Number)) {
+        g.style.setProperty('--kol', k);
+        const miesci = [...g.children].every((c) => { const s = getComputedStyle(c), luka = parseFloat(s.columnGap) || 0;
+          const tresc = [...c.children].reduce((w, x) => w + x.getBoundingClientRect().width, 0) + luka * Math.max(0, c.children.length - 1);
+          return tresc + parseFloat(s.paddingLeft) + parseFloat(s.paddingRight) <= c.clientWidth + 0.01; });
+        if (miesci) break;
       }
     }
   }
-  function uloz() { wJednymRzedzie(); naPiksel(); }
+  function uloz() { naSiatce(); naPiksel(); }
   addEventListener('resize', uloz);
   if (document.fonts) document.fonts.ready.then(uloz);
   function tytulSzczegolow(d) {
@@ -206,7 +231,7 @@
       + `<div class="srodek">${W.filtry(st.filtry)}</div><div class="stopka"><button class="przycisk glowny" type="button" data-akcja="zamknij-filtry"><span class="tx">Pokaż ${n} ${U.odmiana(n, 'model', 'modele', 'modeli')}</span></button></div>`;
     arkusz.querySelector('.srodek').scrollTop = y;
   }
-  function otworzArkusz() { rysujArkusz(); arkusz.hidden = false; tlo.hidden = false; naPiksel(); arkusz.querySelector('.okragly').focus(); }
+  function otworzArkusz() { rysujArkusz(); arkusz.hidden = false; tlo.hidden = false; uloz(); arkusz.querySelector('.okragly').focus(); }
   function zamknijArkusz() { if (arkusz.hidden) return false; arkusz.hidden = true; tlo.hidden = true; const b = tresc.querySelector('[data-akcja="filtry"]'); if (b) b.focus(); return true; }
   tlo.addEventListener('click', zamknijArkusz);
 
@@ -228,7 +253,7 @@
   function podgladSuwaka(s) {
     const w = wartoscSuwaka(s), k = s.dataset.suwak;
     const t = k === 'budzet' ? W.etBudzet(w) : k === 'przebieg' ? W.etPrzebieg(w) : 'od ' + w;
-    s.closest('.filtr').querySelector('output').textContent = t;
+    const o = s.closest('.filtr').querySelector('output'); (o.querySelector('.tx') || o).textContent = t;
     s.setAttribute('aria-valuetext', t);
     s.style.setProperty('--p', (100 * (s.value - s.min) / (s.max - s.min)).toFixed(1) + '%');
   }
@@ -309,7 +334,7 @@
     if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('tr[data-otworz]')) { e.preventDefault(); const [r, id] = t.dataset.otworz.split(':'); otworz(r, id); }
   });
   document.addEventListener('focusout', (e) => { if (e.target.matches && e.target.matches('.nazwa-zestawu') && st.edycja) zakonczEdycje(e.target, true); });
-  ciemny.addEventListener('change', () => { pasek.innerHTML = ''; rysuj(); });
+  ciemny.addEventListener('change', () => { pasek.innerHTML = ''; polyskStrony(); rysuj(); });
 
   // Wstecz telefonu (przez Kasiomobile) najpierw zamyka arkusz filtrów, potem szczegóły i podstrony po jednej, potem (poza Katalagiem,
   // gdzie widoki są w Kasiomobile) wraca do pierwszego widoku, a dopiero potem wychodzi.

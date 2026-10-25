@@ -21,14 +21,14 @@
 
   // Pigułki kolejności stoją tylko na telefonie, bo szersze okno ma te same nagłówki kolumn: pod widokami, poza kartą listy, w jednym rzędzie,
   // a w Modelach pod przyciskiem Filtry (Jacek, 24.10.2026: „razem, nie zbite, jedno po drugim”, „najpierw zaczynamy od filtrów … to musi być
-  // w linii”). Wielkość napisu dobiera app.js (wJednymRzedzie). Napis ma od razu miejsce na pogrubienie wybranej (data-n).
+  // w linii”). Od 25.10.2026 to trzy równe pigułki na całą szerokość karty listy (siatka 12 kolumn, po 4), a wielkość napisu dobiera
+  // app.js (naSiatce). Napis ma od razu miejsce na pogrubienie wybranej (data-n).
   const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, n]) =>
     `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}"><span class="napis" data-n="${n}"><span class="tx">${n}</span></span></button>`).join('') + '</div>';
   const pasekListy = (akt, gdzie, filtry = '') => `<div class="pasek-listy${filtry ? ' z-filtrami' : ''}">${filtry}${soczewki(akt, gdzie)}</div>`;
-  // Atlas w zakładce Katalag Kasiomobile (od 25.10.2026, ?k=katalag): rząd widoków rysuje Kasiomobile (tylko Marki i Modele), więc na górze
-  // listy stoi jedno zdanie drugim planem, a Mój ranking i Typy aut otwierają się z karty na jej końcu, jako podstrony ze strzałką Wstecz.
-  // Poza Katalagiem ani zdania, ani karty nie ma.
-  const zdanie = (st, t) => (st.katalag ? `<p class="zdanie-katalagu">${t}</p>` : '');
+  // Atlas w zakładce Katalag Kasiomobile (od 25.10.2026, ?k=katalag): rząd widoków rysuje Kasiomobile (tylko Marki i Modele, pełnymi
+  // nazwami), a Mój ranking i Typy aut otwierają się z karty na końcu listy, jako podstrony ze strzałką Wstecz. Zdania nad listą nie ma
+  // od 25.10.2026 (Jacek przez Kasiomobile: „tekstu w ogóle nie widać”), a poza Katalagiem nie ma też karty.
   const PODSTRONY = [['moj', 'Mój ranking', 'turkus'], ['typy', 'Typy aut', 'braz']];
   // Kolejność wierszy ustawia Jacek: przeciągnięciem myszą albo Alt + strzałką, z cofaniem Ctrl+Z (st.podstrony, app.js).
   const dalej = (st) => {
@@ -64,7 +64,7 @@
     const wiersze = widac.map((m, i) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>${komorki(m, akt, sk)}</tr>`).join('');
     const reszta = malo.map((m) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td><span class="miejsce">–</span></td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>`
       + '<td></td></tr>').join('');
-    return `<div class="uklad waski">${zdanie(st, 'Wszystkie marki, od najlepszej.')}${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
+    return `<div class="uklad waski">${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
       + `<table class="lista">${naglowki(akt, 'marki', lista.length)}<tbody>${wiersze}</tbody></table>`
       + przyciskWiecej('marki', st.wszystkie.marki, lista.length)
       + (malo.length ? `<div class="grupa-malo">Za mało danych do rankingu</div><table class="lista malo"><tbody>${reszta}</tbody></table>` : '')
@@ -78,15 +78,15 @@
   const procent = (i, n) => `--p:${(100 * i / n).toFixed(1)}%`;
   function filtry(f) {
     const ib = O.BUDZETY.indexOf(f.budzet), ip = O.PRZEBIEGI.indexOf(f.przebieg), lata = new Date().getFullYear();
-    const chip = (filtr, war, napis, wcisniety, dodatek = '') => `<button class="chip" type="button" data-filtr="${filtr}" data-war="${war}" aria-pressed="${wcisniety}">${dodatek}<span class="tx">${esc(napis)}</span></button>`;
+    const chip = (filtr, war, napis, wcisniety, dodatek = '') => `<button class="chip" type="button" data-filtr="${filtr}" data-war="${war}" aria-pressed="${wcisniety}">${dodatek}<span class="napis" data-n="${esc(napis)}"><span class="tx">${esc(napis)}</span></span></button>`;
     return '<div class="filtry">'
-      + `<div class="filtr"><div class="etykieta" id="et-naped">Napęd</div><div class="chipy" role="group" aria-labelledby="et-naped">${Object.entries(O.NAPEDY).map(([k, n]) => chip('napedy', k, n, f.napedy.includes(k))).join('')}</div></div>`
-      + `<div class="filtr"><label class="etykieta" for="f-budzet">Budżet <output>${etBudzet(f.budzet)}</output></label><input class="suwak" id="f-budzet" type="range" min="0" max="${O.BUDZETY.length - 1}" step="1" value="${ib}" style="${procent(ib, O.BUDZETY.length - 1)}" data-suwak="budzet" aria-valuetext="${etBudzet(f.budzet)}"></div>`
-      + `<div class="filtr"><label class="etykieta" for="f-rok">Rocznik <output>od ${f.rokOd}</output></label><input class="suwak" id="f-rok" type="range" min="${O.ROK_MIN}" max="${lata}" step="1" value="${f.rokOd}" style="${procent(f.rokOd - O.ROK_MIN, lata - O.ROK_MIN)}" data-suwak="rokOd" aria-valuetext="od ${f.rokOd}"></div>`
-      + `<div class="filtr"><label class="etykieta" for="f-przebieg">Przebieg <output>${etPrzebieg(f.przebieg)}</output></label><input class="suwak" id="f-przebieg" type="range" min="0" max="${O.PRZEBIEGI.length - 1}" step="1" value="${ip}" style="${procent(ip, O.PRZEBIEGI.length - 1)}" data-suwak="przebieg" aria-valuetext="${etPrzebieg(f.przebieg)}"></div>`
-      + `<div class="filtr"><div class="etykieta" id="et-typy">Nadwozie</div><div class="chipy" role="group" aria-labelledby="et-typy">${Object.entries(O.TYPY).map(([k, n]) => chip('typy', k, n, f.typy.includes(k), sylTypu(k, 'sylwetka'))).join('')}</div></div>`
-      + `<div class="filtr"><div class="etykieta" id="et-zast">Zastosowanie</div><div class="chipy" role="group" aria-labelledby="et-zast">${Object.entries(O.ZASTOSOWANIA).map(([k, n]) => chip('zastosowanie', k, n, f.zastosowanie === k)).join('')}</div></div>`
-      + `<div class="filtr"><div class="chipy">${chip('tylkoToyota', '1', 'Tylko Toyota i Lexus', f.tylkoToyota)}</div></div>`
+      + `<div class="filtr"><div class="etykieta" id="et-naped">Napęd</div><div class="chipy" role="group" aria-labelledby="et-naped" data-kol="3 1">${Object.entries(O.NAPEDY).map(([k, n]) => chip('napedy', k, n, f.napedy.includes(k))).join('')}</div></div>`
+      + `<div class="filtr"><label class="etykieta" for="f-budzet">Budżet <output><span class="tx">${etBudzet(f.budzet)}</span></output></label><input class="suwak" id="f-budzet" type="range" min="0" max="${O.BUDZETY.length - 1}" step="1" value="${ib}" style="${procent(ib, O.BUDZETY.length - 1)}" data-suwak="budzet" aria-valuetext="${etBudzet(f.budzet)}"></div>`
+      + `<div class="filtr"><label class="etykieta" for="f-rok">Rocznik <output><span class="tx">od ${f.rokOd}</span></output></label><input class="suwak" id="f-rok" type="range" min="${O.ROK_MIN}" max="${lata}" step="1" value="${f.rokOd}" style="${procent(f.rokOd - O.ROK_MIN, lata - O.ROK_MIN)}" data-suwak="rokOd" aria-valuetext="od ${f.rokOd}"></div>`
+      + `<div class="filtr"><label class="etykieta" for="f-przebieg">Przebieg <output><span class="tx">${etPrzebieg(f.przebieg)}</span></output></label><input class="suwak" id="f-przebieg" type="range" min="0" max="${O.PRZEBIEGI.length - 1}" step="1" value="${ip}" style="${procent(ip, O.PRZEBIEGI.length - 1)}" data-suwak="przebieg" aria-valuetext="${etPrzebieg(f.przebieg)}"></div>`
+      + `<div class="filtr"><div class="etykieta" id="et-typy">Nadwozie</div><div class="chipy" role="group" aria-labelledby="et-typy" data-kol="2 1">${Object.entries(O.TYPY).map(([k, n]) => chip('typy', k, n, f.typy.includes(k), sylTypu(k, 'sylwetka'))).join('')}</div></div>`
+      + `<div class="filtr"><div class="etykieta" id="et-zast">Zastosowanie</div><div class="chipy" role="group" aria-labelledby="et-zast" data-kol="3 1">${Object.entries(O.ZASTOSOWANIA).map(([k, n]) => chip('zastosowanie', k, n, f.zastosowanie === k)).join('')}</div></div>`
+      + `<div class="filtr"><div class="chipy" data-kol="1">${chip('tylkoToyota', '1', 'Tylko Toyota i Lexus', f.tylkoToyota)}</div></div>`
       + `<div class="filtr"><label class="etykieta" for="nazwa-zestawu">Zestaw do Mojego rankingu</label><div class="zapis"><input id="nazwa-zestawu" type="text" maxlength="60" placeholder="${esc(O.nazwaZestawu(f))}" autocomplete="off"><button class="przycisk" type="button" data-akcja="zapisz-zestaw">${ik('zapisz')}<span class="tx">Zapisz</span></button></div></div>`
       + `<div class="filtry-stopka"><button class="przycisk" type="button" data-akcja="domyslne"${ileZmian(f) ? '' : ' aria-disabled="true"'}><span class="tx">Przywróć domyślne</span></button></div>`
       + '</div>';
@@ -105,7 +105,7 @@
     const lista = wynik.length
       ? `<table class="lista">${naglowki(akt, 'modele', wynik.length, '<th class="tylko-szeroki"><span class="naglowek-kolumny">Na Otomoto</span></th>')}<tbody>${wiersze}</tbody></table>` + przyciskWiecej('modele', st.wszystkie.modele, wynik.length)
       : `<div class="pusto"><p>Żaden model nie pasuje do tych filtrów. Podnieś budżet albo zdejmij któryś filtr.</p><button class="przycisk glowny" type="button" data-akcja="domyslne"><span class="tx">Przywróć domyślne</span></button></div>`;
-    return '<div class="uklad dwie">' + zdanie(st, 'Modele w Twoich filtrach, od najlepszego.')
+    return '<div class="uklad dwie">'
       + `<aside class="karta filtry-karta" aria-label="Filtry"><div class="naglowek-karty"><h2>Filtry</h2></div><div class="karta-tresc">${filtry(f)}</div></aside>`
       // Prawa kolumna to jedna całość (pasek listy, lista i karta podstron), więc karta stoi zaraz pod listą, a nie pod wyższą kartą filtrów.
       + '<div class="kolumna-listy">' + pasekListy(akt, 'modele', `<button class="przycisk" type="button" data-akcja="filtry">${ik('filtry')}<span class="tx">Filtry${n ? ' · ' + n : ''}</span></button>`)
