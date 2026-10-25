@@ -1,5 +1,5 @@
-// widoki.js: rysowanie widoków Atlasu jako HTML: Marki, Modele z filtrami, Mój ranking, Typy aut, szczegóły marki
-// i modelu oraz ściąga. Tylko rysuje: zdarzenia i stan obsługuje app.js (atrybuty data-akcja, data-otworz, data-filtr).
+// widoki.js: rysowanie widoków Atlasu jako HTML: Marki, Modele z filtrami, Mój ranking, Typy aut oraz szczegóły marki
+// i modelu. Tylko rysuje: zdarzenia i stan obsługuje app.js (atrybuty data-akcja, data-otworz, data-filtr).
 (function () {
   'use strict';
   const O = window.AtlasOcena, U = window.AtlasUI;
@@ -10,7 +10,12 @@
   const SYL = { maly: 'maly', kompakt: 'hatchback', kombi: 'kombi', suv: 'suv', van: 'van', limuzyna: 'sedan' };
   const nadwozie = (id) => (id === 'maly' ? MALY : A().przewodnik.nadwozia.find((n) => n.id === id));
   const sylTypu = (typ, kl) => U.sylwetka(nadwozie(SYL[typ]), kl);
-  const nazwaModelu = (m) => `${m.marka} ${m.model}`;
+  // Nazwa modelu, która zaczyna się od marki („Mazda2 Hybrid”, „MG4 Electric”), stoi bez marki z przodu, a nie „Mazda Mazda2 Hybrid”.
+  const nazwaModelu = (m) => (m.model.toLowerCase().startsWith(m.marka.toLowerCase()) ? m.model : `${m.marka} ${m.model}`);
+  // Nazwa na liście bez podpisu pod spodem (Jacek, 25.10.2026: „Żadnych podpisów pod samochodami”). Lata stoją tylko wtedy, gdy dwie
+  // generacje mają tę samą nazwę (Yaris, C-HR, RAV4), w tej samej linii, bo inaczej lista miałaby dwa takie same wiersze.
+  const nazwaNaLiscie = (m) => { const n = nazwaModelu(m), dwie = A().modele.some((x) => x !== m && nazwaModelu(x) === n);
+    return `<div class="nazwa"><b>${esc(n)}${dwie ? `<span class="lata">${esc(m.lata)}</span>` : ''}</b></div>`; };
   const ocena = (x, s, szac) => (x == null ? '<span class="ocena brak">–</span>' : `<span class="ocena${szac ? ' szac' : ''}" data-s="${s}"><span class="tx">${liczba(x)}</span></span>`);
   const zakres = (ry) => (ry && ry.ceny ? `${tys(ry.ceny[0])}–${tys(ry.ceny[2])} tys. zł` : '');
 
@@ -44,7 +49,7 @@
     const widac = st.wszystkie.marki ? lista : lista.slice(0, 10);
     const sk = skale(lista);
     const wiersze = widac.map((m, i) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>${komorki(m, akt, sk)}</tr>`).join('');
-    const reszta = malo.map((m) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td><span class="miejsce">–</span></td><td><div class="nazwa"><b>${esc(m.nazwa)}</b><span class="pod">${esc(O.brakDanych(m))}</span></div></td>`
+    const reszta = malo.map((m) => `<tr tabindex="0" data-otworz="marka:${m.id}"><td><span class="miejsce">–</span></td><td><div class="nazwa"><b>${esc(m.nazwa)}</b></div></td>`
       + '<td></td></tr>').join('');
     return `<div class="uklad waski">${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
       + `<table class="lista">${naglowki(akt, 'marki', lista.length)}<tbody>${wiersze}</tbody></table>`
@@ -81,8 +86,7 @@
     const wynik = O.rankingModeli(A().modele, f, akt);
     const widac = st.wszystkie.modele ? wynik : wynik.slice(0, 10);
     const sk = skale(wynik.map((x) => x.m));
-    const wiersze = widac.map(({ m, ry }, i) => `<tr tabindex="0" data-otworz="model:${m.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(nazwaModelu(m))}</b>`
-      + `<span class="pod">${esc(m.lata)}${zakres(ry) ? `<span class="tylko-telefon"> · ${zakres(ry)}</span>` : ''}</span></div></td>${komorki(m, akt, sk)}`
+    const wiersze = widac.map(({ m, ry }, i) => `<tr tabindex="0" data-otworz="model:${m.id}"><td>${miejsce(i)}</td><td>${nazwaNaLiscie(m)}</td>${komorki(m, akt, sk)}`
       + `<td class="tylko-szeroki"><span class="cena">${zakres(ry) || '<span class="drugi">mało ogłoszeń</span>'}</span>${ry.przebieg ? `<br><span class="cena drugi">zwykle ${tys(ry.przebieg)} tys. km</span>` : ''}</td></tr>`).join('');
     const n = ileZmian(f);
     const lista = wynik.length
@@ -98,7 +102,7 @@
   // Tabela Mojego rankingu: mediana miejsc (lider niebieski, reszta zielona), a na szerszym ekranie obok ogółem w skali całej listy.
   function tabelaMoj(wynik, widac) {
     const sk = U.skala(wynik.map((x) => x.m.ogolem));
-    const wiersze = widac.map((x, i) => `<tr tabindex="0" data-otworz="model:${x.m.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(nazwaModelu(x.m))}</b><span class="pod">w ${x.obecny} z ${x.z} ${odmiana(x.z, 'zestawu', 'zestawów', 'zestawów')}</span></div></td>`
+    const wiersze = widac.map((x, i) => `<tr tabindex="0" data-otworz="model:${x.m.id}"><td>${miejsce(i)}</td><td>${nazwaNaLiscie(x.m)}</td>`
       + `<td class="liczba"><span class="ocena" data-s="${i === 0 ? 'lider' : '3'}"><span class="tx">${liczba(x.mediana, x.mediana % 1 ? 1 : 0)}</span></span></td><td class="liczba tylko-szeroki">${ocena(x.m.ogolem, sk(x.m.ogolem), x.m.niezSzac)}</td></tr>`).join('');
     return `<table class="lista"><thead><tr><th><span class="ukryte">Miejsce</span></th><th><span class="naglowek-kolumny">Model</span></th><th class="liczba"><span class="naglowek-kolumny">Mediana miejsc</span></th><th class="liczba tylko-szeroki"><span class="naglowek-kolumny">Ogółem</span></th></tr></thead><tbody>${wiersze}</tbody></table>`;
   }
@@ -126,12 +130,13 @@
       + `<button class="okragly maly bez-ciagniecia" type="button" data-akcja="otworz-zestaw" data-id="${z.id}" aria-label="Pokaż ten zestaw w Modelach" data-dymek="Pokaż ten zestaw w Modelach">${ik('dalej')}</button>`
       + `<button class="okragly maly bez-ciagniecia" type="button" data-akcja="usun-zestaw" data-id="${z.id}" aria-label="Usuń zestaw" data-dymek="Usuń zestaw">${ik('usun')}</button>`
       + '</div></div>').join('');
+    // Najpierw wynik, pod nim zestawy, z których się liczy (reguła dobry-interfejs, zasada 18: wniosek to nagłówek).
     return '<div class="uklad waski">'
-      + `<section class="karta" aria-label="Zestawy"><div class="naglowek-karty"><h2>Zestawy</h2><span class="licznik">${wlaczone.length} z ${st.zestawy.length} w rankingu</span></div><div class="zestawy" id="zestawy">${zestawy}</div></section>`
       + `<section class="karta" aria-label="Mój ranking"><div class="naglowek-karty"><h2>Mediana miejsc</h2><span class="licznik">${wynik.length} ${odmiana(wynik.length, 'model', 'modele', 'modeli')}</span></div>`
       + (wynik.length ? tabelaMoj(wynik, widac) + przyciskWiecej('moj', st.wszystkie.moj, wynik.length)
         : `<div class="pusto"><p>${wlaczone.length ? 'W tych zestawach nie ma wspólnych modeli.' : 'Włącz co najmniej jeden zestaw.'}</p></div>`)
-      + '<div style="height:12px"></div></section></div>';
+      + '<div style="height:12px"></div></section>'
+      + `<section class="karta" aria-label="Zestawy"><div class="naglowek-karty"><h2>Zestawy</h2><span class="licznik">${wlaczone.length} z ${st.zestawy.length} w rankingu</span></div><div class="zestawy" id="zestawy">${zestawy}</div></section></div>`;
   }
 
   // ---------------------------------------------------------------- Typy aut
@@ -214,30 +219,9 @@
       + `<div><dt>USA</dt><dd>${m.cr ? `Consumer Reports 2026: ${m.cr}. miejsce` : 'Poza pierwszą czternastką Consumer Reports 2026 albo brak w ankiecie'}</dd></div></dl>`
       + `${m.niezSzac ? '<p class="uwaga">* Bez ankiety usterek: ogółem liczy średnią wszystkich marek.</p>' : ''}<p class="zrodla"><a href="${esc(A().zrodla.whatcarMarki)}" target="_blank" rel="noopener">What Car? ↗</a> · <a href="${esc(A().zrodla.cr)}" target="_blank" rel="noopener">Consumer Reports ↗</a></p></section>`
       + '</div>'
-      + (mod.length ? `<section class="karta"><div class="naglowek-karty"><h2>Modele w Atlasie</h2></div><table class="lista"><tbody>${mod.map((x, i) => `<tr tabindex="0" data-otworz="model:${x.id}"><td>${miejsce(i)}</td><td><div class="nazwa"><b>${esc(nazwaModelu(x))}</b><span class="pod">${esc(x.lata)} · ${esc(O.NAPEDY[x.naped])}</span></div></td><td class="liczba">${ocena(x.ogolem, '3', x.niezSzac)}</td></tr>`).join('')}</tbody></table><div style="height:12px"></div></section>` : '')
+      + (mod.length ? `<section class="karta"><div class="naglowek-karty"><h2>Modele w Atlasie</h2></div><table class="lista"><tbody>${mod.map((x, i) => `<tr tabindex="0" data-otworz="model:${x.id}"><td>${miejsce(i)}</td><td>${nazwaNaLiscie(x)}</td><td class="liczba">${ocena(x.ogolem, '3', x.niezSzac)}</td></tr>`).join('')}</tbody></table><div style="height:12px"></div></section>` : '')
       + '</article>';
   }
 
-  // ---------------------------------------------------------------- ściąga „i”
-  function sciaga() {
-    const p = (s, t) => `<span class="ocena" data-s="${s}" style="--wiersz:var(--strona)">${t}</span>`;
-    return '<section><h3>Kolory</h3><ul>'
-      + `<li>${p('lider', '86')}<span>Najlepszy w tej kolumnie</span></li>`
-      + `<li>${p('3', '84')}<span>Dobry na tle listy</span></li>`
-      + `<li>${p('0', '71')}<span>Najsłabszy na tle listy</span></li>`
-      + `<li><span class="ocena szac" data-s="2" style="--wiersz:var(--strona)">80</span><span>Szacunek bez ankiety usterek</span></li>`
-      + '</ul></section>'
-      + '<section><h3>Kliknięcia</h3><ul>'
-      + `<li><span class="miejsce podium">1</span><span>Wiersz otwiera szczegóły</span></li>`
-      + `<li><span class="przycisk" style="pointer-events:none">${ik('zapisz')}Zapisz</span><span>Filtry do Mojego rankingu</span></li>`
-      + `<li><span>Mysz</span><span>Przeciągnij, żeby przestawić</span></li>`
-      + '</ul></section>'
-      + '<section class="szeroka"><h3>Skróty</h3><ul class="dwie-kolumny">'
-      + '<li><kbd>Ctrl Z</kbd><span>Cofnij</span></li><li><kbd>Ctrl Y</kbd><span>Ponów</span></li>'
-      + '<li><kbd>Alt ← →</kbd><span>Przestaw widok albo kolumnę</span></li><li><kbd>Alt ↑ ↓</kbd><span>Przestaw zestaw</span></li>'
-      + '<li><kbd>Esc</kbd><span>Zamknij albo wróć</span></li><li><kbd>Ctrl kółko</kbd><span>Powiększ ściągę</span></li>'
-      + '</ul></section>';
-  }
-
-  window.AtlasWidoki = { marki, modele, moj, typy, model, marka, filtry, sciaga, ileZmian, etBudzet, etPrzebieg };
+  window.AtlasWidoki = { marki, modele, moj, typy, model, marka, filtry, ileZmian, etBudzet, etPrzebieg, nazwaModelu };
 })();

@@ -1,5 +1,5 @@
-// ui.js: drobne narzędzia ekranu Atlasu: liczby po polsku, skala ocen, dymki, komunikat z „Cofnij”, przeciąganie myszą,
-// ściąga przesuwana i skalowana oraz połysk wybranego widoku. Bez stanu aplikacji: ten jest w app.js.
+// ui.js: drobne narzędzia ekranu Atlasu: liczby po polsku, skala ocen, dymki, komunikat z „Cofnij”, przeciąganie myszą
+// i połysk wybranego widoku. Bez stanu aplikacji: ten jest w app.js.
 (function () {
   'use strict';
   const $ = (s, w = document) => w.querySelector(s);
@@ -108,36 +108,6 @@
       poZmianie(ids, el.dataset.id);
     });
   }
-  // ---------------------------------------------------------------- ściąga: na środku, przesuwana i skalowana
-  function sciaga(okno, html, poZamknieciu) {
-    okno.innerHTML = `<button class="okragly maly zamknij" type="button" aria-label="Zamknij ściągę" data-dymek="Zamknij ściągę">${ik('zamknij')}</button>`
-      + `<div class="srodek">${html}</div><div class="uchwyt" aria-hidden="true">${ik('uchwyt')}</div>`;
-    let skala = 1, dx = 0, dy = 0;
-    const ustaw = () => { okno.style.setProperty('--skala', skala); okno.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${skala})`; };
-    const zamknij = () => { okno.hidden = true; document.removeEventListener('keydown', klawisz, true); document.body.classList.remove('czyta'); poZamknieciu && poZamknieciu(); };
-    const klawisz = (e) => { if (e.key === 'Escape') { e.stopPropagation(); zamknij(); } };
-    okno.querySelector('.zamknij').onclick = zamknij;
-    const srodek = okno.querySelector('.srodek');
-    srodek.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('section') || e.button !== 0) return;
-      const p = { x: e.clientX - dx, y: e.clientY - dy };
-      const ruch = (m) => { dx = m.clientX - p.x; dy = m.clientY - p.y; ustaw(); };
-      addEventListener('pointermove', ruch); addEventListener('pointerup', () => removeEventListener('pointermove', ruch), { once: true });
-    });
-    okno.querySelector('.uchwyt').addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      const s0 = skala, x0 = e.clientX;
-      const ruch = (m) => { skala = Math.min(1.6, Math.max(0.75, s0 + (m.clientX - x0) / 400)); ustaw(); };
-      addEventListener('pointermove', ruch); addEventListener('pointerup', () => removeEventListener('pointermove', ruch), { once: true });
-    });
-    okno.addEventListener('wheel', (e) => {
-      if (e.ctrlKey) { e.preventDefault(); skala = Math.min(1.6, Math.max(0.75, skala - Math.sign(e.deltaY) * 0.1)); ustaw(); }
-      else if (!srodek.contains(e.target)) e.preventDefault();
-    }, { passive: false });
-    ustaw(); okno.hidden = false; document.body.classList.add('czyta');
-    document.addEventListener('keydown', klawisz, true);
-    okno.querySelector('.zamknij').focus();
-  }
 
   // ---------------------------------------------------------------- połysk wybranego widoku
   // Barwa smugi losowana przy każdym uruchomieniu: co najmniej 70° od barwy widoku i 1,4:1 do jego pastelu.
@@ -156,5 +126,5 @@
     przycisk.style.setProperty('--polysk', wybor);
   }
 
-  window.AtlasUI = { $, esc, ik, liczba, tys, odmiana, skala, sylwetka, komunikat, przeciagalne, sciaga, polysk, schowajDymek, kontrast };
+  window.AtlasUI = { $, esc, ik, liczba, tys, odmiana, skala, sylwetka, komunikat, przeciagalne, polysk, schowajDymek, kontrast };
 })();

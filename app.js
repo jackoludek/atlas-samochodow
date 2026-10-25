@@ -66,7 +66,7 @@
     const a = document.activeElement, sel = a && a !== document.body ? selektorFokusu(a) : null, wArkuszu = a && arkusz.contains(a);
     rysujPasek();
     const d = st.szczegoly;
-    document.body.classList.toggle('czyta', Boolean(d) || !$('#sciaga').hidden);
+    document.body.classList.toggle('czyta', Boolean(d));
     // Na telefonie szczegóły mają u góry samą strzałkę Wstecz, a lista same widoki (styl.css, część „telefon”).
     document.body.classList.toggle('w-szczegolach', Boolean(d));
     tresc.setAttribute('aria-labelledby', 'tab-' + st.widok);
@@ -185,10 +185,6 @@
   function zamknijArkusz() { if (arkusz.hidden) return false; arkusz.hidden = true; tlo.hidden = true; const b = tresc.querySelector('[data-akcja="filtry"]'); if (b) b.focus(); return true; }
   tlo.addEventListener('click', zamknijArkusz);
 
-  // ---------------------------------------------------------------- ściąga
-  const okno = $('#sciaga');
-  function otworzSciage() { U.sciaga(okno, W.sciaga(), () => { $('#info').focus(); rysujPasek(); }); }
-  $('#info').addEventListener('click', otworzSciage);
 
   // ---------------------------------------------------------------- filtry i zestawy
   const zmienFiltr = (fn, opis = 'filtry') => zmien(opis, () => { fn(st.filtry); st.wszystkie.modele = false; });
@@ -289,10 +285,9 @@
   document.addEventListener('focusout', (e) => { if (e.target.matches && e.target.matches('.nazwa-zestawu') && st.edycja) zakonczEdycje(e.target, true); });
   ciemny.addEventListener('change', () => { pasek.innerHTML = ''; rysuj(); });
 
-  // Android: przycisk Wstecz najpierw zamyka arkusz, ściągę i szczegóły, dopiero potem aplikację.
+  // Wstecz telefonu (przez Kasiomobile) najpierw zamyka arkusz filtrów i szczegóły, potem wraca do pierwszego widoku, dopiero potem wychodzi.
   window.Atlas = {
     wstecz() {
-      if (!okno.hidden) { okno.querySelector('.zamknij').click(); return true; }
       if (zamknijArkusz()) return true;
       if (st.szczegoly) { zamknijSzczegoly(); return true; }
       if (st.widok !== st.kolejnosc[0]) { widok(st.kolejnosc[0]); return true; }
@@ -311,6 +306,30 @@
     addEventListener('message', (e) => { if (e.source === window.parent && e.data && e.data.atlas === 'wstecz' && !window.Atlas.wstecz()) zamknijWKasiomobile(); });
   }
 
+  // Nowa wersja w sieci (od 25.10.2026): Atlas w ramce Kasiomobile i w karcie przeglądarki stoi otwarty godzinami, a Kasiomobile ładuje go
+  // raz na sesję, więc telefon potrafił pokazywać starą wersję długo po wysłaniu nowej (Jacek, 25.10.2026: „Po raz siódmy mówię …”).
+  // Przy starcie i po każdym powrocie do aplikacji strona pyta o wersja.txt. Gdy w sieci stoi inna wersja niż jej własna (znacznik
+  // atlas-wersja, wpisuje go wyslij-do-sieci.ps1), wczytuje się od nowa pod adresem z ?v=<wersja>, który omija pamięć przeglądarki
+  // i serwera. Stan (widok, filtry, zestawy) leży w pamięci strony, więc ginie tylko otwarty szczegół. Najwyżej raz na 5 minut, a dla tej
+  // samej nowej wersji raz na 15 minut, żeby serwer, który jeszcze podaje starą stronę, nie zapętlił odświeżania.
+  const WERSJA = (document.querySelector('meta[name="atlas-wersja"]') || {}).content || '';
+  let sprawdzone = 0;
+  function sprawdzWersje() {
+    if (!WERSJA || location.protocol !== 'https:' || !navigator.onLine || Date.now() - sprawdzone < 5 * 60000) return;
+    sprawdzone = Date.now();
+    fetch('wersja.txt?n=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.text() : '')).then((t) => {
+      const nowa = t.trim();
+      if (!/^[0-9a-f]{12}$/.test(nowa) || nowa === WERSJA) return;
+      const klucz = 'atlas-samochodow:odswiezenie';
+      try { const z = JSON.parse(sessionStorage.getItem(klucz) || '{}'); if (z.w === nowa && Date.now() - z.t < 15 * 60000) return; sessionStorage.setItem(klucz, JSON.stringify({ w: nowa, t: Date.now() })); } catch { return; }
+      const p = new URLSearchParams(location.search); p.set('v', nowa);
+      location.replace(location.pathname + '?' + p);
+    }).catch(() => { /* bez sieci zostaje ta wersja */ });
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sprawdzWersje(); });
+  addEventListener('online', sprawdzWersje);
+
   rysuj();
   nowszeDane();
+  sprawdzWersje();
 })();

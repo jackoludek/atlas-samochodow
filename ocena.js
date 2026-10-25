@@ -55,7 +55,6 @@
     const reszta = marki.filter((m) => !pelne.includes(m));
     return { lista: pelne.sort(porzadek(soczewka)), malo: reszta };
   }
-  const brakDanych = (m) => (!m.testy.length ? 'bez testów Euro NCAP' : m.testy.length < 2 ? 'tylko jeden test Euro NCAP' : 'brak ankiety usterek');
 
   // Mój ranking: miejsce modelu w każdym zestawie (brak w zestawie to miejsce za ostatnim), mediana miejsc.
   // W wyniku tylko modele obecne w co najmniej połowie zestawów.
@@ -99,7 +98,7 @@
     return u;
   }
 
-  const AtlasOcena = { BUDZETY, PRZEBIEGI, ROK_MIN, NAPEDY, TYPY, ZASTOSOWANIA, SOCZEWKI, domyslne, rynek, pasuje, rankingModeli, rankingMarek, brakDanych, rankingZestawow, przyklad, nazwaZestawu, adresOtomoto, mediana, tys };
+  const AtlasOcena = { BUDZETY, PRZEBIEGI, ROK_MIN, NAPEDY, TYPY, ZASTOSOWANIA, SOCZEWKI, domyslne, rynek, pasuje, rankingModeli, rankingMarek, rankingZestawow, przyklad, nazwaZestawu, adresOtomoto, mediana, tys };
   if (typeof module !== 'undefined' && module.exports) module.exports = AtlasOcena;
   else glob.AtlasOcena = AtlasOcena;
 })(typeof window !== 'undefined' ? window : globalThis);
