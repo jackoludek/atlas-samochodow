@@ -30,8 +30,13 @@
   // Poza Katalagiem ani zdania, ani karty nie ma.
   const zdanie = (st, t) => (st.katalag ? `<p class="zdanie-katalagu">${t}</p>` : '');
   const PODSTRONY = [['moj', 'Mój ranking', 'turkus'], ['typy', 'Typy aut', 'braz']];
-  const dalej = (st) => (st.katalag ? '<nav class="karta dalej-obszar" aria-label="Więcej w Atlasie">' + PODSTRONY.map(([k, n, w]) =>
-    `<button class="dalej-wiersz" type="button" data-akcja="podstrona" data-strona="${k}" data-w="${w}"><span class="kafel">${ik(k)}</span><span class="tx">${n}</span>${ik('dalej')}</button>`).join('') + '</nav>' : '');
+  // Kolejność wierszy ustawia Jacek: przeciągnięciem myszą albo Alt + strzałką, z cofaniem Ctrl+Z (st.podstrony, app.js).
+  const dalej = (st) => {
+    if (!st.katalag) return '';
+    const kolej = (st.podstrony || []).map((k) => PODSTRONY.find((p) => p[0] === k)).filter(Boolean);
+    return '<nav class="karta dalej-obszar" aria-label="Więcej w Atlasie">' + (kolej.length === PODSTRONY.length ? kolej : PODSTRONY).map(([k, n, w]) =>
+      `<button class="dalej-wiersz" type="button" data-akcja="podstrona" data-strona="${k}" data-id="${k}" data-w="${w}"><span class="kafel">${ik(k)}</span><span class="tx">${n}</span>${ik('dalej')}</button>`).join('') + '</nav>';
+  };
   const wsteczPodstrony = (st, k) => (st.szczegoly && st.szczegoly.rodzaj === k ? wstecz(st) : '');
   // Wersja tekstu (reguła skrot-i-wersja-pelna): najpierw „W skrócie”, potem „Całość”. Kolejność stała, bo coś znaczy: skrót prowadzi do całości.
   const wersje = (gdzie, calosc) => `<div class="wersje" role="radiogroup" aria-label="Wersja tekstu">`

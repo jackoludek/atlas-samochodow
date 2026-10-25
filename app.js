@@ -28,19 +28,20 @@
   }
 
   // ---------------------------------------------------------------- stan i pamięć
-  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), kolumny: ['ogolem', 'bezp', 'niez'], soczewka: { marki: 'ogolem', modele: 'ogolem' }, calosc: { typy: false, model: false }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false } });
+  const poczatek = () => ({ widok: 'marki', kolejnosc: Object.keys(WIDOKI), kolumny: ['ogolem', 'bezp', 'niez'], soczewka: { marki: 'ogolem', modele: 'ogolem' }, calosc: { typy: false, model: false }, filtry: O.domyslne(), zestawy: [], wszystkie: { marki: false, modele: false, moj: false }, podstrony: [...PODSTRONY] });
   let st = poczatek();
   try {
     const z = JSON.parse(localStorage.getItem(KLUCZ) || 'null');
     if (z) { st = { ...st, ...z, filtry: { ...O.domyslne(), ...z.filtry }, soczewka: { ...st.soczewka, ...z.soczewka }, calosc: { ...st.calosc, ...z.calosc }, wszystkie: { ...st.wszystkie, ...z.wszystkie } };
       if (!Array.isArray(st.kolejnosc) || st.kolejnosc.length !== 4 || !st.kolejnosc.every((k) => WIDOKI[k])) st.kolejnosc = Object.keys(WIDOKI);
-      if (!WIDOKI[st.widok]) st.widok = 'marki'; }
+      if (!WIDOKI[st.widok]) st.widok = 'marki';
+      if (!Array.isArray(st.podstrony) || st.podstrony.length !== PODSTRONY.length || !PODSTRONY.every((k) => st.podstrony.includes(k))) st.podstrony = [...PODSTRONY]; }
   } catch { /* pierwszy raz */ }
   st.szczegoly = null; st.edycja = null;
   // W Katalagu widok to Marki albo Modele z adresu. st.katalag mówi widokom o zdaniu na górze i wierszach podstron; nie trafia do pamięci.
   if (W_KATALAG) { const w0 = ADRES.get('widok'); st.widok = w0 === 'marki' || w0 === 'modele' ? w0 : st.widok === 'modele' ? 'modele' : 'marki'; st.katalag = true; }
   let widokRodzica = st.widok;
-  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, calosc: st.calosc, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie });
+  const trwale = () => JSON.stringify({ widok: st.widok, kolejnosc: st.kolejnosc, kolumny: st.kolumny, soczewka: st.soczewka, calosc: st.calosc, filtry: st.filtry, zestawy: st.zestawy, wszystkie: st.wszystkie, podstrony: st.podstrony });
   const zapisz = () => { try { localStorage.setItem(KLUCZ, trwale()); } catch { /* bez pamięci */ } };
 
   // Historia operacji: zrzut stanu przed zmianą. Nowa zmiana kasuje to, co było do ponowienia.
@@ -91,6 +92,8 @@
     const kolumny = (kontener, sel, cel) => U.przeciagalne(kontener, sel, { os: 'x', poZmianie: (ids, fokus) => { zmien('kolejność kolumn', () => { st.kolumny = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(cel(fokus)); if (b) b.focus(); }); } });
     if (glowka && glowka.querySelector('th[data-id]')) kolumny(glowka, 'th[data-id]', (k) => `th[data-id="${k}"] button`);
     if (!d) for (const s of tresc.querySelectorAll('.soczewki')) kolumny(s, '.chip[data-id]', (k) => `.soczewki .chip[data-id="${k}"]`);
+    // Wiersze Mój ranking i Typy aut na końcu listy w Katalagu: przestawiane myszą i Alt + strzałką, jedna kolejność dla obu list.
+    for (const k of tresc.querySelectorAll('.dalej-obszar')) U.przeciagalne(k, '.dalej-wiersz', { os: 'y', poZmianie: (ids, fokus) => { zmien('kolejność podstron', () => { st.podstrony = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(`.dalej-wiersz[data-id="${fokus}"]`); if (b) b.focus(); }); } });
     if (st.edycja) { const p = tresc.querySelector('.nazwa-zestawu'); if (p) { p.focus(); p.select(); } }
     uloz();
     if (przewin != null) scrollTo(0, przewin);

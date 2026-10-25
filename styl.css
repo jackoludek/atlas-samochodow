@@ -351,6 +351,8 @@ body.w-katalagu main { padding: 24px var(--km-bok) 48px; }
 .dalej-wiersz:hover { background: var(--pod-kursorem); }
 .dalej-wiersz:active { background: color-mix(in srgb, var(--akcent) 14%, var(--karta)); }
 .dalej-wiersz:focus-visible { outline-offset: -2px; }
+.dalej-wiersz.ciagniety { opacity: .45; }
+.dalej-wiersz.cel-przed { box-shadow: inset 0 2px 0 var(--akcent); }
 .dalej-wiersz[data-w="turkus"] { --g1: #40c8e0; --g2: #0071a4; }
 .dalej-wiersz[data-w="braz"] { --g1: #c69c6d; --g2: #7f6545; }
 
