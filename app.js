@@ -112,7 +112,7 @@
   // przyciętego do wersalików) dosuwamy na najbliższy piksel, który jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi):
   // rzędy przycisków odstępem nad rzędem, pas z kolorowym tłem (nagłówek Mojego rankingu) oboma odstępami naraz, żeby napis został
   // na jego środku, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
-  const RZEDY = '.pas-pastel, .dalej-obszar, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .etykieta, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
+  const RZEDY = '.pas-pastel, .dalej-obszar, .widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
   const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .uklad > .wstecz, .przewodnik > .wstecz, .karta-tresc > .przycisk';
   const gora = $('.gora');
   // Linia pisma w układzie strony, bez przewinięcia: pasek u góry od swojej krawędzi (w szczegółach się przykleja), nagłówek tabeli
@@ -158,9 +158,8 @@
   // poniżej 11 px (najwęższe telefony), odstęp maleje do 8 px (klasa ciasno). Do tego wysokość wersalików musi dać się postawić na środku
   // pigułki co do pół piksela ekranu (pigułka minus wersaliki, w pikselach ekranu, prawie parzyste: najwyżej ćwierć piksela obok),
   // więc napis schodzi jeszcze krokami po ćwierć piksela, gdy wypada między pikselami (412 px przy skali 3: 12 px zamiast 12,5,
-  // 320 px przy skali 1,5: 9,75 px zamiast 10). Chipy filtrów stoją po tyle
-  // w rzędzie, ile mówi pierwsza liczba z data-kol, przy której każdy napis mieści się z 8 px z boku; inaczej następna liczba (po trzy
-  // albo po dwa, potem jeden w rzędzie). Ukryty arkusz czeka na otwarcie.
+  // 320 px przy skali 1,5: 9,75 px zamiast 10). Chipy filtrów stoją po dwa w rzędzie (data-kol, Kasiomobile, 25.10.2026), a gdy któryś
+  // napis nie mieści się z 8 px z boku, jeden w rzędzie (karta filtrów na komputerze). Ukryty arkusz czeka na otwarcie.
   const NAPIS_SOCZEWEK = 15;
   function naSiatce() {
     for (const r of document.querySelectorAll('.pasek-listy .soczewki')) {
@@ -253,7 +252,7 @@
   function podgladSuwaka(s) {
     const w = wartoscSuwaka(s), k = s.dataset.suwak;
     const t = k === 'budzet' ? W.etBudzet(w) : k === 'przebieg' ? W.etPrzebieg(w) : 'od ' + w;
-    const o = s.closest('.filtr').querySelector('output'); (o.querySelector('.tx') || o).textContent = t;
+    s.closest('.filtr').querySelector('output').textContent = t;
     s.setAttribute('aria-valuetext', t);
     s.style.setProperty('--p', (100 * (s.value - s.min) / (s.max - s.min)).toFixed(1) + '%');
   }
