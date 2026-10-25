@@ -295,6 +295,9 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 /* ------------------------------------------------------------------ mój ranking */
 .zestawy { display: grid; gap: 12px; padding: 0 24px 24px; }
 .zestaw { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--strona); }
+/* W ciemnym motywie zestaw stoi na drugim tle (#1c1c1e), jak zestawy w przykładzie, bo czerń na czarnej karcie nie dawała kształtu,
+   a jego okrągłe przyciski o stopień jaśniej (#2c2c2e), żeby odcinały się od zestawu (reguła ciemny-motyw-czarny). */
+@media (prefers-color-scheme: dark) { .zestaw { background: #1c1c1e; } .zestaw .okragly { background: var(--pole); } }
 .zestaw.wylaczony .opis-zestawu { opacity: .55; }
 .zestaw .opis-zestawu b { font-weight: 600; display: block; }
 .zestaw .opis-zestawu span { font-size: 13px; color: var(--drugi); }
