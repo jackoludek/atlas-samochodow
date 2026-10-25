@@ -71,6 +71,13 @@
       .sort((a, b) => a.mediana - b.mediana || a.srednia - b.srednia || b.m.ogolem - a.m.ogolem);
   }
 
+  // Przykład w pustym Moim rankingu (Jacek, 24.10.2026: „Mógłby dać przykład tego”): trzy zestawy, jakie mogłaby zapisać rodzina.
+  const przyklad = () => [
+    { nazwa: 'Miasto do 60 tys.', filtry: { ...domyslne(), budzet: 60, zastosowanie: 'miasto' }, soczewka: 'ogolem' },
+    { nazwa: 'Rodzina do 75 tys.', filtry: { ...domyslne(), rokOd: 2018, przebieg: 150, zastosowanie: 'wypady' }, soczewka: 'ogolem' },
+    { nazwa: 'Tylko Toyota i Lexus', filtry: { ...domyslne(), tylkoToyota: true }, soczewka: 'bezp' },
+  ];
+
   const tys = (zl) => Math.round(zl / 1000);
   function nazwaZestawu(f) {
     const czesci = [f.napedy.map((n) => NAPEDY[n]).join(' i ')];
@@ -92,7 +99,7 @@
     return u;
   }
 
-  const AtlasOcena = { BUDZETY, PRZEBIEGI, ROK_MIN, NAPEDY, TYPY, ZASTOSOWANIA, SOCZEWKI, domyslne, rynek, pasuje, rankingModeli, rankingMarek, brakDanych, rankingZestawow, nazwaZestawu, adresOtomoto, mediana, tys };
+  const AtlasOcena = { BUDZETY, PRZEBIEGI, ROK_MIN, NAPEDY, TYPY, ZASTOSOWANIA, SOCZEWKI, domyslne, rynek, pasuje, rankingModeli, rankingMarek, brakDanych, rankingZestawow, przyklad, nazwaZestawu, adresOtomoto, mediana, tys };
   if (typeof module !== 'undefined' && module.exports) module.exports = AtlasOcena;
   else glob.AtlasOcena = AtlasOcena;
 })(typeof window !== 'undefined' ? window : globalThis);

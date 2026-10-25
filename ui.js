@@ -9,7 +9,7 @@
   const tys = (zl) => liczba(Math.round(zl / 1000));
   const odmiana = (n, jeden, kilka, wiele) => (n === 1 ? jeden : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? kilka : wiele);
 
-  // Skala ocen w jednej kolumnie: najsłabszy czerwony, najlepszy fioletowy (lider), reszta w czterech krokach.
+  // Skala ocen w jednej kolumnie: najsłabszy czerwony, najlepszy niebieski (lider), reszta w czterech krokach.
   function skala(wartosci) {
     const w = wartosci.filter((x) => x != null).map((x) => Math.round(x));
     const min = Math.min(...w), max = Math.max(...w);

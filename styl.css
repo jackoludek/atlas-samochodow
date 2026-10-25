@@ -1,12 +1,14 @@
 /* styl.css: wygląd Atlasu Samochodów. Wzorzec rodziny porównywarek (Rozpoznawanie Mowy AI, Ranking Modeli) i „05 --- Jacek
    Design Guidelines”: role kolorów Apple w jednym miejscu, jasny i ciemny motyw za systemem (ciemny to czerń), pigułki,
-   karty 14 px, włosek i miękki cień, odstępy ze skali 4 i 8 px. Krój Inter 4.1 (SIL OFL 1.1, licencja obok). */
+   karty 14 px, włosek i miękki cień, odstępy ze skali 4 i 8 px. Krój Inter 4.1 (SIL OFL 1.1, licencja obok).
+   Lider (najlepszy w kolumnie) jest od 24.10.2026 niebieski jak dymek wiadomości Jacka w czacie Kiro, #0071e3 w obu motywach, z białym
+   pogrubionym napisem 4,70:1 (Jacek: „Zwycięzca jest na niebieskim kolorze. Tak bym chciał spróbować”). Do tego dnia fiolet #a843db. */
 @font-face { font-family: "Inter"; src: url("inter.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
 
 :root {
   color-scheme: light dark;
   --strona: #f5f5f7; --karta: #ffffff; --tekst: #1d1d1f; --drugi: #6e6e73; --drugi-mocny: #636366;
-  --link: #0066cc; --akcent: #0071e3; --akcent-tekst: #ffffff; --lider: #a843db;
+  --link: #0066cc; --akcent: #0071e3; --akcent-tekst: #ffffff; --lider: #0071e3;
   --pole: #e8e8ed; --przycisk: #ffffff; --linia: #e8e8ed; --pas: #f0f6fd; --pod-kursorem: #e0eefc;
   --wlosek: rgba(0, 0, 0, .12);
   --cien-karty: 0 0 0 .5px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .08);
@@ -61,6 +63,10 @@ a:hover { text-decoration: underline; }
 .gora { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; padding: 16px 24px; }
 .gora-lewa { font-size: 13px; color: var(--drugi); min-width: 0; }
 .gora-prawa { display: flex; justify-content: flex-end; gap: 12px; }
+/* Ściąga „i” mówi o myszy i klawiaturze, więc na ekranie dotykowym jej nie ma, a w oknie Kasiomobile też nie (Jacek, 24.10.2026:
+   „ty mi tu piszesz rzeczy, które są na PC, a ja jestem przecież na telefonie”). Na telefonie każdy przycisk ma podpis. */
+body.w-kasiomobile .gora-prawa { display: none; }
+@media (hover: none) and (pointer: coarse) { .gora-prawa { display: none; } }
 .widoki { display: flex; gap: 24px; padding: 4px; }
 .widok {
   --h: var(--b-niebieski); --g1: #0a84ff; --g2: #0060df;
@@ -78,9 +84,9 @@ a:hover { text-decoration: underline; }
 .widok .kafel { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: #fff;
   background: linear-gradient(180deg, var(--g1), var(--g2)); box-shadow: inset 0 .5px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .2); }
 .widok .kafel .ikona { width: 14px; height: 14px; stroke-width: 2.1; }
-.widok .napis { display: grid; }
-.widok .napis > span, .widok .napis::after { grid-area: 1 / 1; text-box: trim-both cap alphabetic; }
-.widok .napis::after { content: attr(data-n); font-weight: 650; visibility: hidden; }
+.widok .napis, .chip .napis { display: grid; }
+.widok .napis > span, .widok .napis::after, .chip .napis > span, .chip .napis::after { grid-area: 1 / 1; text-box: trim-both cap alphabetic; }
+.widok .napis::after, .chip .napis::after { content: attr(data-n); font-weight: 650; visibility: hidden; }
 .widok[aria-selected="true"] {
   font-weight: 650;
   background-color: color-mix(in srgb, var(--h) var(--pastel), var(--karta));
@@ -184,7 +190,7 @@ p { margin: 0 0 12px; }
 .lista th:first-child, .lista td:first-child { padding-left: 16px; }
 .lista th:last-child, .lista td:last-child { padding-right: 16px; }
 .lista th.liczba, .lista td.liczba { text-align: right; }
-.naglowek-kolumny { display: inline-flex; align-items: center; height: 28px; padding: 0 16px; border: 0; border-radius: 14px; font-size: 13px; font-weight: 600;
+.naglowek-kolumny { position: relative; display: inline-flex; align-items: center; height: 28px; padding: 0 16px; border: 0; border-radius: 14px; font-size: 13px; font-weight: 600;
   color: var(--drugi); background: var(--strona); box-shadow: var(--cien); white-space: nowrap; }
 button.naglowek-kolumny:hover { transform: translateY(-1px); }
 /* Nagłówek, którego nie da się kliknąć (liczba, „Model”, „Na Otomoto”), jest zwykłym napisem, bez kształtu przycisku. */
@@ -198,14 +204,15 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .lista tbody tr:last-child td:first-child { border-bottom-left-radius: var(--promien); }
 .lista tbody tr:last-child td:last-child { border-bottom-right-radius: var(--promien); }
 .lista td:first-child { width: 1%; white-space: nowrap; }
-.miejsce { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 600;
+.miejsce { position: relative; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 600;
   color: var(--drugi); background: var(--pole); font-variant-numeric: tabular-nums; }
 .miejsce.podium { color: var(--link); background: color-mix(in srgb, var(--akcent) 14%, var(--karta)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--akcent) 40%, transparent); font-weight: 700; }
 .nazwa { display: grid; gap: 2px; min-width: 0; }
 .nazwa b { font-weight: 600; color: var(--link); }
 .nazwa .pod { font-size: 13px; color: var(--drugi); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .nazwa .pod .ikona { width: 13px; height: 13px; stroke-width: 2; }
-.ocena { display: inline-block; min-width: 4.2em; padding: 2px 10px; border-radius: 999px; text-align: center; font-size: 14px; font-weight: 500;
+.ocena { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 4.2em; height: 24px; padding: 0 10px;
+  border-radius: 999px; font-size: 14px; font-weight: 500;
   color: var(--s-tekst); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--s, var(--pole)) 42%, var(--wiersz, var(--karta))); }
 .ocena[data-s="0"] { --s: var(--s0); } .ocena[data-s="1"] { --s: var(--s1); } .ocena[data-s="2"] { --s: var(--s2); } .ocena[data-s="3"] { --s: var(--s3); }
 .ocena[data-s="lider"] { background: var(--lider); color: #fff; font-weight: 700; }
@@ -218,7 +225,6 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .pusto p { max-width: 46ch; margin: 0 auto 16px; }
 .grupa-malo { padding: 8px 24px 4px; font-size: 13px; font-weight: 600; color: var(--drugi); }
 .lista.malo tbody tr { --wiersz: var(--karta); }
-.tylko-waski { display: none; }
 .tylko-telefon { display: none; }
 .tytul-widoku { display: none; color: var(--tekst); }
 .przewodnik a, .szczegoly a:not(.przycisk) { display: inline-flex; align-items: center; min-height: 32px; }
@@ -228,11 +234,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .szczegoly { max-width: 980px; margin: 0 auto; display: grid; gap: 24px; }
 .szczegoly .tytul { display: grid; gap: 8px; }
 .szczegoly .tytul .drugi { font-size: 15px; }
-.telefon-karta { display: flex; gap: 16px; align-items: center; padding: 16px 20px; }
-.telefon-karta .kafel-tel { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 12px; color: #fff;
-  background: linear-gradient(180deg, #7d7aff, #3634a3); box-shadow: inset 0 .5px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .2); }
-.telefon-karta .kafel-tel .ikona { width: 22px; height: 22px; stroke-width: 1.8; }
-.telefon-karta b { display: block; font-size: 19px; font-weight: 600; }
+.szczegoly .opis-marki { margin: 4px 0 0; max-width: 60ch; font-size: 19px; line-height: 1.45; }
 .wyniki { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .wynik { display: grid; gap: 4px; padding: 16px 20px; }
 .wynik .co { font-size: 13px; color: var(--drugi); display: flex; align-items: center; gap: 6px; }
@@ -266,15 +268,15 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 /* ------------------------------------------------------------------ skrót i całość (reguła skrot-i-wersja-pelna) */
 .przewodnik > .wersje { grid-column: 1 / -1; margin-top: 8px; }
 .przewodnik.skrot { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
-.skrot-karta .sedno { margin: 0 0 16px; font-size: 19px; font-weight: 600; line-height: 1.45; }
+.skrot-karta .sedno, .przyklad .sedno { margin: 0 0 16px; font-size: 19px; font-weight: 600; line-height: 1.45; }
 .skrot-karta .sedno, .skrot-karta .kesy, .skrot-karta p { max-width: 72ch; }
 .kesy { display: grid; gap: .75em; margin: 0 0 20px; padding-left: 1.2em; line-height: 1.55; }
 .kesy b { font-weight: 600; }
 .haczyk { margin: 20px 0 16px; color: var(--drugi); }
 .akcje-skrotu { display: flex; flex-wrap: wrap; gap: 12px 16px; }
-/* Napisy tych przycisków są przycięte do wersalików, jak w pigułkach widoków, a ich rząd stoi na całym pikselu ekranu (app.js, naPiksel).
-   Bez tego napis stał do 0,6 px za wysoko (pomiar 23.10.2026). */
-.wersje .chip .tx, .akcje-skrotu .przycisk .tx { text-box: trim-both cap alphabetic; }
+/* Napisy przycisków i pigułek są przycięte do wersalików, jak w pigułkach widoków, a linia pisma stoi na całym pikselu ekranu
+   (app.js, naPiksel). Bez tego napis stał do 1,5 px ekranu za wysoko albo za nisko (testy\srodek.mjs, 23 i 24.10.2026). */
+.przycisk .tx, .chip .tx, .naglowek-kolumny .tx, .ocena .tx, .miejsce .tx { text-box: trim-both cap alphabetic; }
 
 /* ------------------------------------------------------------------ przewodnik (Typy aut) */
 .przewodnik { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
@@ -292,7 +294,6 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .wiersze .drugi { font-size: 14px; }
 .wiersze .ostrzezenie b { color: #c93400; }
 @media (prefers-color-scheme: dark) { .wiersze .ostrzezenie b { color: #ff9f0a; } }
-.telefony { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
 
 /* ------------------------------------------------------------------ mój ranking */
 .zestawy { display: grid; gap: 12px; padding: 0 24px 24px; }
@@ -308,6 +309,16 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .przelacznik[aria-checked="true"] { background: var(--akcent); }
 .przelacznik[aria-checked="true"]::before { transform: translateX(18px); }
 .nazwa-zestawu { width: 100%; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--karta); box-shadow: inset 0 0 0 2px var(--akcent); font-weight: 600; }
+
+/* ------------------------------------------------------------------ pusty Mój ranking: przykład */
+.przyklad .sedno { max-width: 60ch; margin-bottom: 24px; }
+.przyklad .karta-tresc { padding-bottom: 4px; }
+.przyklad-zestawy { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 8px; }
+.przyklad-zestawy li { display: grid; gap: 2px; padding: 12px 16px; border-radius: 12px; background: var(--strona); }
+@media (prefers-color-scheme: dark) { .przyklad-zestawy li { background: #1c1c1e; } }
+.przyklad-zestawy b { font-weight: 600; }
+.przyklad-zestawy .drugi { font-size: 13px; }
+.akcje-przykladu { display: flex; flex-wrap: wrap; gap: 12px 16px; padding: 20px 24px 24px; }
 
 /* ------------------------------------------------------------------ arkusz filtrów (telefon), ściąga, dymek, toast */
 .arkusz-tlo { position: fixed; inset: 0; z-index: 20; background: var(--zasloniecie); }
@@ -346,29 +357,44 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .widoki { gap: 16px; }
 }
 @media (max-width: 1060px) {
-  .uklad.dwie { grid-template-columns: 1fr; }
+  .uklad.dwie { grid-template-columns: minmax(0, 1fr); }
   .uklad.dwie > .filtry-karta { display: none; }
-  .tylko-waski { display: inline-flex; }
-  .pasek-listy.dla-filtrow { display: flex; }
+  .pasek-listy.z-filtrami { display: flex; }
   .pasek-listy .soczewki { display: none; }
   .siatka-szczegolow, .przewodnik { grid-template-columns: 1fr; }
 }
 
 /* ------------------------------------------------------------------ telefon */
+/* Widoki stoją u góry, w treści, a tuż pod nimi pigułki kolejności: razem, jedno pod drugim, z oddechem (Jacek, 24.10.2026: „To bym też
+   razem, nie zbite, jedno po drugim … estetycznie i elegancko”, jak w Rankingu AI na jego telefonie). Przewijają się z listą, więc ekran
+   jest dla treści, a w szczegółach zostaje u góry sama strzałka Wstecz. Tytułu widoku nie ma: mówi go wybrana pigułka. */
 @media (max-width: 720px) {
-  body { font-size: 16px; padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
-  .gora { padding: 12px 16px 0; grid-template-columns: minmax(0, 1fr) auto; }
-  .gora-lewa { grid-column: 1; }
-  .widoki { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 16px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--strona) 86%, transparent); backdrop-filter: blur(16px) saturate(1.6); -webkit-backdrop-filter: blur(16px) saturate(1.6);
-    box-shadow: 0 -.5px 0 var(--wlosek); }
-  .widok { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 4px; width: auto; max-width: 104px; height: 56px; padding: 0 4px; border-radius: 16px; font-size: 12px; }
-  .widok .napis { display: grid; }
+  body { font-size: 16px; padding-bottom: env(safe-area-inset-bottom); }
+  .gora { display: flex; align-items: center; gap: 16px; padding: 12px 12px 0; }
+  .gora-lewa { flex: 1 1 auto; }
+  .gora-prawa { flex: none; }
+  body:not(.w-szczegolach) .gora-lewa, body.w-szczegolach .widoki { display: none; }
+  /* W szczegółach strzałka Wstecz zostaje u góry przy przewijaniu, a treść pod nią miękko gaśnie (jak krawędź przewijania w iOS),
+     bez paska i kreski. Przez wygaszenie da się stukać w to, co pod nim. */
+  body.w-szczegolach .gora { position: sticky; top: 0; z-index: 5; padding-bottom: 4px; background: var(--strona); }
+  body.w-szczegolach .gora::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 16px; pointer-events: none;
+    background: linear-gradient(var(--strona), transparent); }
+  .widoki { flex: 1 1 0; min-width: 0; gap: 8px; padding: 0; }
+  .widok { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 4px; width: auto; min-width: 0; height: 56px; padding: 0 4px; border-radius: 16px; font-size: 12px; }
+  /* Kafelek i napis mają razem 36 px (kafelek 24, odstęp 4, pole napisu 8, a wersaliki 8,7 px wystają z niego w górę): kafelek stoi
+     10 px pod górną krawędzią, a linia pisma 46 px, więc przy skali 1,5, 3 i 4 wszystko wypada na całych pikselach ekranu. */
+  .widok .napis { display: grid; height: 8px; align-content: end; }
   .widok:hover { transform: none; }
-  main { padding: 12px 12px 32px; }
+  main { padding: 16px 12px 32px; }
   .uklad, .szczegoly { gap: 16px; }
+  /* Kolumna ma szerokość ekranu, a nie treści: inaczej rząd pigułek rozpycha stronę, zamiast zmaleć (pomiar 24.10.2026: 407 px przy 320). */
+  .uklad, .uklad.dwie { grid-template-columns: minmax(0, 1fr); }
+  .pasek-listy, .pasek-listy.z-filtrami { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .pasek-listy .przycisk { justify-self: start; height: 40px; border-radius: 20px; }
+  .pasek-listy .soczewki { display: flex; flex-wrap: nowrap; gap: 8px; }
+  .pasek-listy .chip { flex: 1 0 auto; justify-content: center; padding: 0 var(--bok, 16px); font-size: var(--napis, 15px); background: var(--przycisk); }
+  .pasek-listy .chip[aria-checked="true"] { background: color-mix(in srgb, var(--akcent) 18%, var(--karta)); box-shadow: var(--cien), 0 0 0 2px var(--strona), 0 0 0 4px var(--akcent); }
   .naglowek-karty { padding: 16px 12px 12px; }
-  .soczewki .chip { font-size: 13px; }
   .karta-tresc { padding: 16px; }
   .lista th { display: none; }
   .lista td { padding: 10px 6px; }
@@ -376,10 +402,9 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .lista th:last-child, .lista td:last-child { padding-right: 12px; }
   .lista .tylko-szeroki { display: none; }
   .tylko-telefon { display: inline; }
-  .pasek-listy, .pasek-listy .soczewki { display: flex; }
   .naglowek-karty .licznik { display: none; }
 
-  .tytul-widoku { display: block; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+  .tytul-widoku { display: block; }
   .tytul-widoku .przycisk { position: relative; font-size: 15px; }
   .szczegoly > .wstecz { display: none; }
   .przewodnik a, .szczegoly a:not(.przycisk) { min-height: 44px; }
@@ -392,7 +417,6 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .pasek-w { grid-template-columns: 9.6em minmax(0, 1fr) 3em; }
   .fakty > div { grid-template-columns: 1fr; gap: 2px; }
   .wiersze li { grid-template-columns: 1fr; gap: 4px; }
-  .telefony { grid-template-columns: 1fr; }
   .nadwozia { grid-template-columns: repeat(2, minmax(0, 1fr)); }  .nadwozie { padding: 16px 14px; }  .nadwozie .sylwetka-duza { width: 120px; height: 48px; }
   .zestawy { padding: 0 16px 16px; }
   .zestaw { grid-template-columns: auto minmax(0, 1fr); }
@@ -404,12 +428,9 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
   .sciaga section { padding: 16px; }
   .sciaga .dwie-kolumny { grid-template-columns: 1fr; }
   .sciaga { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
-  .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(16px + env(safe-area-inset-bottom)); }
   h1 { font-size: 24px; }
-  .skrot-karta .sedno { font-size: 17px; }
+  .skrot-karta .sedno, .przyklad .sedno, .szczegoly .opis-marki { font-size: 17px; }
   .przewodnik > .wersje { margin-top: 0; }
-}
-/* Najwęższe telefony: cztery widoki mieszczą się dopiero przy 8 px odstępu. */
-@media (max-width: 380px) {
-  .widoki { gap: 8px; }
+  .akcje-przykladu { padding: 16px; }
 }

@@ -55,7 +55,7 @@
     const istniejace = [...pasek.children].map((b) => b.dataset.id).join();
     if (istniejace !== st.kolejnosc.join()) {
       pasek.innerHTML = st.kolejnosc.map((k) => { const [n, i, w] = WIDOKI[k];
-        return `<button class="widok" type="button" role="tab" data-id="${k}" data-w="${w}" id="tab-${k}" aria-controls="tresc" aria-label="${esc(n)}" data-dymek="${esc(n)}"><span class="kafel">${ik(i)}</span><span class="napis" data-n="${esc(n)}"><span>${esc(n)}</span></span></button>`; }).join('');
+        return `<button class="widok" type="button" role="tab" data-id="${k}" data-w="${w}" id="tab-${k}" aria-controls="tresc" aria-label="${esc(n)}" data-dymek="${esc(n)}"><span class="kafel">${ik(i)}</span><span class="napis" data-n="${esc(n)}"><span class="tx">${esc(n)}</span></span></button>`; }).join('');
       for (const b of pasek.children) U.polysk(b, getComputedStyle(b).getPropertyValue('--h').trim() || '#0071e3', ciemny.matches);
     }
     for (const b of pasek.children) { const tak = b.dataset.id === st.widok; b.setAttribute('aria-selected', String(tak)); b.tabIndex = tak ? 0 : -1; }
@@ -67,43 +67,86 @@
     rysujPasek();
     const d = st.szczegoly;
     document.body.classList.toggle('czyta', Boolean(d) || !$('#sciaga').hidden);
+    // Na telefonie szczegóły mają u góry samą strzałkę Wstecz, a lista same widoki (styl.css, część „telefon”).
+    document.body.classList.toggle('w-szczegolach', Boolean(d));
     tresc.setAttribute('aria-labelledby', 'tab-' + st.widok);
     tresc.innerHTML = d ? (d.rodzaj === 'model' ? W.model(st, d.id) : W.marka(st, d.id)) : W[st.widok](st);
     const nazwyWidokow = { marki: 'Marki', modele: 'Modele', moj: 'Mój ranking', typy: 'Typy aut' };
-    $('#tytul-widoku').innerHTML = d ? `<button class="przycisk" type="button" data-akcja="wstecz">${ik('wstecz')}${esc(nazwyWidokow[d.skad] || 'Wstecz')}</button>` : esc(WIDOKI[st.widok][0]);
+    $('#tytul-widoku').innerHTML = d ? `<button class="przycisk" type="button" data-akcja="wstecz">${ik('wstecz')}<span class="tx">${esc(nazwyWidokow[d.skad] || 'Wstecz')}</span></button>` : '';
     document.title = d ? `${tytulSzczegolow(d)} · Atlas Samochodów` : `${WIDOKI[st.widok][0]} · Atlas Samochodów`;
     if (!$('#filtry-arkusz').hidden) rysujArkusz();
     if (st.widok === 'moj' && !d) { const z = $('#zestawy'); if (z) U.przeciagalne(z, '.zestaw', { os: 'y', poZmianie: (ids, fokus) => zmien('kolejność zestawów', () => { st.zestawy = ids.map((id) => st.zestawy.find((x) => x.id === id)); }) || fokusuj(fokus) }); }
     const glowka = !d && tresc.querySelector('.lista thead tr');
-    // Kolumny ocen przestawia nagłówek tabeli i pigułki kolejności (wąskie okno, telefon z myszą): jedna kolejność w st.kolumny.
+    // Kolumny ocen przestawia nagłówek tabeli i pigułki kolejności (telefon; przeciąga tylko mysz): jedna kolejność w st.kolumny.
     const kolumny = (kontener, sel, cel) => U.przeciagalne(kontener, sel, { os: 'x', poZmianie: (ids, fokus) => { zmien('kolejność kolumn', () => { st.kolumny = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(cel(fokus)); if (b) b.focus(); }); } });
     if (glowka && glowka.querySelector('th[data-id]')) kolumny(glowka, 'th[data-id]', (k) => `th[data-id="${k}"] button`);
     if (!d) for (const s of tresc.querySelectorAll('.soczewki')) kolumny(s, '.chip[data-id]', (k) => `.soczewki .chip[data-id="${k}"]`);
     if (st.edycja) { const p = tresc.querySelector('.nazwa-zestawu'); if (p) { p.focus(); p.select(); } }
-    naPiksel();
+    uloz();
     if (przewin != null) scrollTo(0, przewin);
     if (sel && !st.edycja && !document.activeElement.closest?.('.zapis')) { const e = (wArkuszu && arkusz.querySelector(sel)) || document.querySelector(sel); if (e && e !== document.activeElement) e.focus({ preventScroll: true }); }
   }
   const fokusuj = (id) => id && requestAnimationFrame(() => { const e = document.querySelector(`[data-id="${id}"]`); if (e) e.focus(); });
-  // Rząd „W skrócie” i „Całość” i przyciski pod skrótem stoją w tekście, który płynie, więc zwykle wypadają na ułamku piksela, a wtedy
-  // napis stał do 0,6 px za wysoko (pomiar 23.10.2026). Przeglądarka rysuje linię pisma na całym pikselu strony, a przy skali 1,5 jeszcze
-  // na całym pikselu ekranu, więc odstęp nad rzędem dosuwa linię pisma (dół napisu przyciętego do wersalików) na najbliższy piksel, który
-  // jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi; gdy takiego nie ma w 4 px, sam cały piksel strony; reguła „Precyzja”).
+  // Napisy przycisków i pigułek są przycięte do wersalików (.tx), więc stoją na środku, ale w tekście, który płynie, zwykle wypadają
+  // na ułamku piksela. Przeglądarka rysuje linię pisma na całym pikselu strony, a przy skali 1,5 jeszcze na całym pikselu ekranu, więc
+  // napis stał do 1,5 px ekranu za wysoko albo za nisko (pomiar 23 i 24.10.2026, testy\srodek.mjs). Dlatego linię pisma (dół napisu
+  // przyciętego do wersalików) dosuwamy na najbliższy piksel, który jest całym pikselem i strony, i ekranu (przy skali 1,5 co drugi):
+  // rzędy przycisków odstępem nad rzędem, a pojedyncze pigułki w tabelach i listach przesunięciem samej pigułki (reguła „Precyzja”).
+  const RZEDY = '.widoki, #tytul-widoku, .wersje, .akcje-skrotu, .pasek-listy, .soczewki, .wiecej, .akcje-przykladu, .pusto, .filtry .chipy, .filtry .zapis, .filtry-stopka, .filtry-arkusz .stopka';
+  const PIGULKI = '.lista .miejsce, .lista .ocena, .testy .ocena, th .naglowek-kolumny, .szczegoly > .wstecz, .karta-tresc > .przycisk';
+  const gora = $('.gora');
+  // Linia pisma w układzie strony, bez przewinięcia: pasek u góry od swojej krawędzi (w szczegółach się przykleja), nagłówek tabeli
+  // od tabeli (też się przykleja), arkusz filtrów od okna (stoi na stałe) razem z przewinięciem swojego środka, reszta od początku strony.
+  function liniaPisma(t) {
+    const b = t.getBoundingClientRect().bottom;
+    if (gora.contains(t)) return b - gora.getBoundingClientRect().top + (parseFloat(getComputedStyle(document.body).paddingTop) || 0);
+    const th = t.closest('th');
+    if (th) return b - th.getBoundingClientRect().top + th.closest('thead').getBoundingClientRect().top + scrollY;
+    if (t.closest('.filtry-arkusz')) { const w = t.closest('.srodek'); return b + (w ? w.scrollTop : 0); }
+    return b + scrollY;
+  }
+  // Najbliższy piksel, który jest całym pikselem i strony, i ekranu; gdy takiego nie ma w kilku pikselach, sam cały piksel strony.
+  function dobryPiksel(y, d, tylkoNizej) {
+    let k0 = null;
+    for (let k = Math.floor(y) - 3; k <= Math.ceil(y) + 4; k++) {
+      if ((tylkoNizej && k < y - 0.001) || Math.abs(k * d - Math.round(k * d)) > 0.01) continue;
+      if (k0 == null || Math.abs(k - y) < Math.abs(k0 - y)) k0 = k;
+    }
+    return k0 ?? (tylkoNizej ? Math.ceil(y - 0.001) : Math.round(y));
+  }
   function naPiksel() {
     const d = window.devicePixelRatio || 1;
-    for (const r of tresc.querySelectorAll('.wersje, .akcje-skrotu')) {
+    // Rzędy po kolei, bo odstęp nad jednym przesuwa wszystko pod nim.
+    for (const r of document.querySelectorAll(RZEDY)) {
       r.style.paddingTop = '';
       const t = r.querySelector('.tx');
-      if (!r.offsetParent || !t) continue;
-      const y = t.getBoundingClientRect().bottom + scrollY;
-      let k = Math.ceil(y - 0.001), i = 0;
-      while (i < 4 && Math.abs((k + i) * d - Math.round((k + i) * d)) > 0.01) i++;
-      if (i < 4) k += i;
-      if (k - y > 0.001) r.style.paddingTop = (k - y).toFixed(4) + 'px';
+      if (!r.offsetParent || !t || !t.getClientRects().length) continue;
+      const p0 = parseFloat(getComputedStyle(r).paddingTop) || 0, y = liniaPisma(t), k = dobryPiksel(y, d, true);
+      if (k - y > 0.001) r.style.paddingTop = (p0 + k - y).toFixed(4) + 'px';
+    }
+    // Pigułki na końcu i naraz: przesunięcie jednej nie rusza innych, więc najpierw wszystkie odczyty, potem wszystkie zapisy.
+    const pigulki = [...document.querySelectorAll(PIGULKI)];
+    for (const p of pigulki) p.style.top = '';
+    const o = pigulki.map((p) => { const t = p.querySelector('.tx'); if (!t || !t.getClientRects().length) return 0; const y = liniaPisma(t); return dobryPiksel(y, d, false) - y; });
+    pigulki.forEach((p, i) => { if (Math.abs(o[i]) > 0.001) p.style.top = o[i].toFixed(4) + 'px'; });
+  }
+  // Pigułki kolejności na telefonie stoją w jednym rzędzie (Jacek, 24.10.2026: „to musi być w linii”), jak pigułki ocen w Rankingu AI:
+  // napis tej samej wielkości we wszystkich trzech, największy do 15 px, przy którym każda ma 16 px tła z każdej strony, krokami po 0,5 px,
+  // najmniej 13 px. Gdy i to za mało (najwęższe telefony), maleje tło po bokach, najmniej do 10 px, a na końcu napis do 12 px.
+  const KROKI_RZEDU = [15, 14.5, 14, 13.5, 13].map((n) => [n, 16]).concat([[13, 14], [13, 12], [13, 10], [12.5, 10], [12, 10]]);
+  function wJednymRzedzie() {
+    for (const r of tresc.querySelectorAll('.pasek-listy .soczewki')) {
+      r.style.removeProperty('--napis'); r.style.removeProperty('--bok');
+      if (!r.offsetParent || getComputedStyle(r).flexWrap !== 'nowrap') continue;
+      for (const [n, b] of KROKI_RZEDU) {
+        r.style.setProperty('--napis', n + 'px'); r.style.setProperty('--bok', b + 'px');
+        if (r.scrollWidth <= r.clientWidth) break;
+      }
     }
   }
-  addEventListener('resize', naPiksel);
-  if (document.fonts) document.fonts.ready.then(naPiksel);
+  function uloz() { wJednymRzedzie(); naPiksel(); }
+  addEventListener('resize', uloz);
+  if (document.fonts) document.fonts.ready.then(uloz);
   function tytulSzczegolow(d) {
     const A = window.ATLAS;
     if (d.rodzaj === 'model') { const m = A.modele.find((x) => x.id === d.id); return m ? `${m.marka} ${m.model}` : ''; }
@@ -135,10 +178,10 @@
     const n = O.rankingModeli(window.ATLAS.modele, st.filtry, st.soczewka.modele).length;
     const srodek = arkusz.querySelector('.srodek'), y = srodek ? srodek.scrollTop : 0;
     arkusz.innerHTML = `<div class="glowka"><h2>Filtry</h2><button class="okragly maly" type="button" data-akcja="zamknij-filtry" aria-label="Zamknij filtry" data-dymek="Zamknij filtry">${ik('zamknij')}</button></div>`
-      + `<div class="srodek">${W.filtry(st.filtry)}</div><div class="stopka"><button class="przycisk glowny" type="button" data-akcja="zamknij-filtry">Pokaż ${n} ${U.odmiana(n, 'model', 'modele', 'modeli')}</button></div>`;
+      + `<div class="srodek">${W.filtry(st.filtry)}</div><div class="stopka"><button class="przycisk glowny" type="button" data-akcja="zamknij-filtry"><span class="tx">Pokaż ${n} ${U.odmiana(n, 'model', 'modele', 'modeli')}</span></button></div>`;
     arkusz.querySelector('.srodek').scrollTop = y;
   }
-  function otworzArkusz() { rysujArkusz(); arkusz.hidden = false; tlo.hidden = false; arkusz.querySelector('.okragly').focus(); }
+  function otworzArkusz() { rysujArkusz(); arkusz.hidden = false; tlo.hidden = false; naPiksel(); arkusz.querySelector('.okragly').focus(); }
   function zamknijArkusz() { if (arkusz.hidden) return false; arkusz.hidden = true; tlo.hidden = true; const b = tresc.querySelector('[data-akcja="filtry"]'); if (b) b.focus(); return true; }
   tlo.addEventListener('click', zamknijArkusz);
 
@@ -211,6 +254,7 @@
         case 'zmien-nazwe': st.edycja = d.id; rysuj(); return;
         case 'otworz-zestaw': { const z = st.zestawy.find((x) => x.id === d.id); zmien('filtry z zestawu', () => { st.filtry = JSON.parse(JSON.stringify(z.filtry)); st.soczewka.modele = z.soczewka || 'ogolem'; st.widok = 'modele'; }); scrollTo(0, 0); return; }
         case 'usun-zestaw': { const z = st.zestawy.find((x) => x.id === d.id); zmien('usunięcie zestawu', () => { st.zestawy = st.zestawy.filter((x) => x.id !== d.id); }, { komunikat: `Usunięty zestaw „${z.nazwa}”` }); return; }
+        case 'przyklad': { const t = Date.now().toString(36); zmien('przykładowe zestawy', () => { st.zestawy = O.przyklad().map((z, i) => ({ id: 'z' + t + i, nazwa: z.nazwa, filtry: z.filtry, soczewka: z.soczewka, wlaczony: true })); }, { komunikat: 'Zapisane trzy przykładowe zestawy' }); return; }
         case 'widok': widok(d.widok); return;
         case 'wstecz': e.preventDefault(); history.state && history.state.atlas ? history.back() : zamknijSzczegoly(); return;
         case 'pokaz-typ': e.preventDefault(); zmien('filtr nadwozia', () => { st.filtry.typy = [d.typ]; st.widok = 'modele'; }); scrollTo(0, 0); return;
