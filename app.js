@@ -288,6 +288,16 @@
   });
   U.przeciagalne(pasek, '.widok', { os: 'x', poZmianie: (ids, fokus) => { zmien('kolejność widoków', () => { st.kolejnosc = ids; }); fokusuj(fokus); } });
 
+  // Szkło przycisków (styl.css): wciśnięty rozświetla się od miejsca dotyku, więc przycisk dostaje --mx i --my przy pointerdown,
+  // jak swiatloPrzyciskow w Kasiomobile.
+  document.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest ? e.target.closest('button, a.przycisk') : null;
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    b.style.setProperty('--mx', Math.round(e.clientX - r.left) + 'px');
+    b.style.setProperty('--my', Math.round(e.clientY - r.top) + 'px');
+  }, { capture: true, passive: true });
+
   document.addEventListener('click', (e) => {
     const otw = e.target.closest('[data-otworz]');
     const akc = e.target.closest('[data-akcja]');

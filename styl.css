@@ -9,12 +9,25 @@
   color-scheme: light dark;
   --strona: #f5f5f7; --karta: #ffffff; --tekst: #1d1d1f; --drugi: #6e6e73; --drugi-mocny: #636366;
   --link: #0066cc; --akcent: #0071e3; --akcent-tekst: #ffffff; --lider: #0071e3;
-  --pole: #e8e8ed; --przycisk: #ffffff; --linia: #e8e8ed; --pod-kursorem: #e0eefc;
+  --pole: #e8e8ed; --linia: #e8e8ed; --pod-kursorem: #e0eefc;
   --wlosek: rgba(0, 0, 0, .12);
   /* Włosek między wierszami list, jak separator w iOS: 0,5 px, czyli jeden piksel ekranu na telefonie. */
   --wlos-listy: rgba(60, 60, 67, .29);
   --cien-karty: 0 0 0 1px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .08);
-  --cien: inset 0 .5px 0 rgba(255, 255, 255, .7), 0 0 0 .5px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .08), 0 2px 6px rgba(0, 0, 0, .08);
+  /* Przyciski jak przyciski: szkło z iOS 26 oświetlone z lewego górnego rogu pod 45° (Jacek, 26.10.2026, przez Kasiomobile: „takie mają
+     być wszędzie. Koniec. Kropka … Butony to są butony”). Wariant 4 ze strony „Przyciski jak przyciski - propozycje” (projekt 15), te same
+     liczby co SW w Kasiomobile: blask i jasny brzeg z lewej u góry, ciemniejszy brzeg z prawej u dołu i cień w prawo w dół w trzech
+     warstwach. Bez rozmycia tła (backdrop-filter), bo pod przyciskami Atlasu nic się nie przesuwa. */
+  --szklo: rgba(255, 255, 255, .62); --szklo-kolo: #ffffff;
+  --szklo-lico: linear-gradient(135deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, .045));
+  --szklo-blask: linear-gradient(135deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, 0) 46%);
+  --szklo-brzeg: inset 1px 1px 0 rgba(255, 255, 255, .95), inset -1px -1px 0 rgba(0, 0, 0, .07), 0 0 0 .5px rgba(0, 0, 0, .16);
+  --szklo-cien: 1px 1px 2px rgba(0, 0, 0, .12), 3px 3px 8px rgba(0, 0, 0, .1), 6px 6px 18px rgba(0, 0, 0, .06);
+  --szklo-cien-wybranej: var(--szklo-cien); --szklo-plama: rgba(255, 255, 255, .5);
+  --szklo-lico-pelne: linear-gradient(135deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 10%, rgba(0, 0, 0, .1));
+  --szklo-brzeg-pelne: inset 1px 1px 0 rgba(255, 255, 255, .38), inset -1px -1px 0 rgba(0, 0, 0, .2);
+  --szklo-cien-pelne: 1px 1px 2px rgba(0, 0, 0, .16), 3px 3px 10px color-mix(in srgb, var(--akcent) 42%, transparent);
+  --szklo-ruch: transform .32s cubic-bezier(.3, 1.7, .5, 1), background-color .2s ease, box-shadow .2s ease;
   --cien-arkusza: 0 0 0 1px rgba(0, 0, 0, .14), 0 12px 40px rgba(0, 0, 0, .22);
   --s0: #ff383c; --s1: #ff8d28; --s2: #ffcc00; --s3: #34c759; --s-tekst: #1d1d1f;
   --nacisk: 16%; --nacisk-kursor: 24%; --pastel: 24%; --polysk-sila: 30%;
@@ -32,11 +45,18 @@
   :root {
     --strona: #000000; --karta: #000000; --tekst: #ffffff; --drugi: #c0bfbc; --drugi-mocny: #c0bfbc;
     --link: #2997ff; --akcent: #409cff; --akcent-tekst: #000000;
-    --pole: #2c2c2e; --przycisk: #1c1c1e; --linia: #2c2c2e; --pod-kursorem: #0c1c2e;
+    --pole: #2c2c2e; --linia: #2c2c2e; --pod-kursorem: #0c1c2e;
     --wlosek: rgba(255, 255, 255, .16);
     --wlos-listy: rgba(84, 84, 88, .6);
     --cien-karty: 0 0 0 1px rgba(255, 255, 255, .16);
-    --cien: 0 0 0 .5px rgba(255, 255, 255, .16);
+    /* Szkło w ciemnym: jasny brzeg i włosek, bo cienia na czerni prawie nie widać (liczby jak w Kasiomobile). */
+    --szklo: rgba(44, 44, 46, .6); --szklo-kolo: #1a1a1c;
+    --szklo-lico: linear-gradient(135deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 50%);
+    --szklo-blask: linear-gradient(135deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 50%);
+    --szklo-brzeg: inset 1px 1px 0 rgba(255, 255, 255, .24), inset -1px -1px 0 rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .2);
+    --szklo-cien: 2px 2px 8px rgba(0, 0, 0, .6);
+    --szklo-cien-wybranej: 0 0 0 .5px rgba(255, 255, 255, .2); --szklo-plama: rgba(255, 255, 255, .22);
+    --szklo-cien-pelne: 0 0 0 .5px rgba(255, 255, 255, .2);
     --cien-arkusza: 0 0 0 1px rgba(255, 255, 255, .18), 0 12px 40px rgba(0, 0, 0, .7);
     --s0: #ff4245; --s1: #ff9230; --s2: #ffd600; --s3: #30d158; --s-tekst: #ffffff;
     --nacisk: 24%; --nacisk-kursor: 32%; --pastel: 34%; --polysk-sila: 24%;
@@ -79,15 +99,15 @@ a:hover { text-decoration: underline; }
   --h: var(--b-niebieski); --g1: #0a84ff; --g2: #0060df;
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border: 0; border-radius: 20px;
   font-size: 14px; font-weight: 500; color: var(--tekst); white-space: nowrap; touch-action: manipulation;
-  background: color-mix(in srgb, var(--h) var(--nacisk), var(--pole)); box-shadow: var(--cien);
-  transition: background-color .22s cubic-bezier(.2, 0, 0, 1), box-shadow .22s cubic-bezier(.2, 0, 0, 1), transform .1s ease;
+  background-color: color-mix(in srgb, var(--h) var(--nacisk), var(--pole));
+  background-image: var(--szklo-lico); background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: var(--szklo-brzeg), var(--szklo-cien); transition: var(--szklo-ruch);
 }
 .widok[data-w="niebieski"] { --h: var(--b-niebieski); --g1: #0a84ff; --g2: #0060df; }
 .widok[data-w="indygo"] { --h: var(--b-indygo); --g1: #7d7aff; --g2: #3634a3; }
 .widok[data-w="turkus"] { --h: var(--b-turkus); --g1: #40c8e0; --g2: #0071a4; }
 .widok[data-w="braz"] { --h: var(--b-braz); --g1: #c69c6d; --g2: #7f6545; }
 .widok:hover { background-color: color-mix(in srgb, var(--h) var(--nacisk-kursor), var(--pole)); transform: translateY(-1px); }
-.widok:active { transform: scale(.97); }
 .widok .kafel, .dalej-wiersz .kafel { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 7px; color: #fff;
   background: linear-gradient(180deg, var(--g1), var(--g2)); box-shadow: inset 0 .5px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .2); }
 .widok .kafel .ikona, .dalej-wiersz .kafel .ikona { width: 14px; height: 14px; stroke-width: 2.1; }
@@ -98,9 +118,9 @@ a:hover { text-decoration: underline; }
 .widok[aria-selected="true"] {
   font-weight: 650;
   background-color: color-mix(in srgb, var(--h) var(--pastel), var(--karta));
-  background-image: linear-gradient(105deg, transparent 42%, color-mix(in srgb, var(--polysk, #fff) var(--polysk-sila), transparent) 50%, transparent 58%);
-  background-size: 260% 100%; background-repeat: no-repeat; background-position: 0 0;
-  box-shadow: var(--cien), 0 0 0 2px var(--tlo), 0 0 0 4px var(--akcent), 0 4px 12px color-mix(in srgb, var(--h) 30%, transparent);
+  background-image: linear-gradient(105deg, transparent 42%, color-mix(in srgb, var(--polysk, #fff) var(--polysk-sila), transparent) 50%, transparent 58%), var(--szklo-lico);
+  background-size: 260% 100%, 100% 100%; background-repeat: no-repeat; background-position: 0 0;
+  box-shadow: 0 0 0 2px var(--tlo), 0 0 0 4px var(--akcent), var(--szklo-cien-wybranej);
 }
 /* Smuga światła przechodzi raz, w chwili wyboru (Jacek, 26.10.2026: „jeden raz … jeszcze subtelniejszy”; wcześniej co 4 s):
    klasę blysk daje app.js (blysnij) widokowi albo pigułce kolejności, którą właśnie wybrano, i zdejmuje ją po smudze. */
@@ -108,25 +128,31 @@ a:hover { text-decoration: underline; }
 body.czyta .widok[aria-selected="true"] { animation: none; }
 @keyframes polysk { from { background-position: 100% 0 } to { background-position: 0 0 } }
 .widok.ciagniety { opacity: .45; }
-.widok.cel-przed { box-shadow: var(--cien), -14px 0 0 -12px var(--akcent); }
+.widok.cel-przed { box-shadow: var(--szklo-brzeg), var(--szklo-cien), -14px 0 0 -12px var(--akcent); }
 
 /* ------------------------------------------------------------------ przyciski */
 .przycisk { position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
-  font-size: 14px; font-weight: 600; color: var(--link); background: var(--przycisk); box-shadow: var(--cien); white-space: nowrap;
-  transition: transform .1s ease, box-shadow .15s ease; touch-action: manipulation;
+  font-size: 14px; font-weight: 600; color: var(--tekst); white-space: nowrap; touch-action: manipulation;
+  background-color: var(--szklo); background-image: var(--szklo-lico); background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: var(--szklo-brzeg), var(--szklo-cien); transition: var(--szklo-ruch);
 }
-.przycisk:hover { transform: translateY(-1px); box-shadow: var(--cien), 0 0 0 1px var(--akcent); }
-.przycisk:active { transform: scale(.96); }
+/* Pod kursorem przycisk unosi się o 1 px, bez pierścienia, bo kształt daje szkło. Napis w kolorze tekstu, jak szklane przyciski
+   Kasiomobile: link na ciemnym szkle miał przy brzegu napisu 4,06:1. */
+.przycisk:hover { transform: translateY(-1px); }
+a.przycisk:hover { text-decoration: none; }
 .przycisk[aria-disabled="true"] { opacity: .45; pointer-events: none; }
-.przycisk.glowny { color: #fff; background: var(--akcent); box-shadow: 0 2px 8px rgba(0, 113, 227, .28); }
+/* Wypełniony (akcja główna, najwyżej jeden na ekranie): akcent z blaskiem, brzegiem i cieniem w tej barwie, jak GUZIK_PELNY w Kasiomobile,
+   ale blask kończy się na 10%, a nie na 34%, bo biały napis na #0071e3 ma 4,70:1 i jaśniejszego tła pod sobą nie zniesie. Pod kursorem
+   ciemnieje o 8%, bo rozjaśniony miał 4,1:1. */
+.przycisk.glowny { color: #fff; background-color: var(--akcent); background-image: var(--szklo-lico-pelne); box-shadow: var(--szklo-brzeg-pelne), var(--szklo-cien-pelne); }
 @media (prefers-color-scheme: dark) { .przycisk.glowny { color: #000; } }
-.przycisk.glowny:hover { background: color-mix(in srgb, var(--akcent) 92%, #fff); }
+.przycisk.glowny:hover { background-color: color-mix(in srgb, var(--akcent) 92%, #000); }
 .przycisk .ikona { width: 16px; height: 16px; }
 .okragly { position: relative; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; color: var(--link);
-  background: var(--przycisk); box-shadow: var(--cien); transition: transform .1s ease, box-shadow .15s ease; touch-action: manipulation; }
-.okragly:hover { transform: translateY(-1px); box-shadow: var(--cien), 0 0 0 1px var(--akcent); }
-.okragly:active { transform: scale(.94); }
+  background-color: var(--szklo); background-image: var(--szklo-lico); background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: var(--szklo-brzeg), var(--szklo-cien); transition: var(--szklo-ruch); touch-action: manipulation; }
+.okragly:hover { transform: translateY(-1px); }
 .okragly.maly { width: 32px; height: 32px; }
 /* Cel dotyku 48 px przy mniejszym kółku: niewidoczny pas wokół (reguła telefonu). */
 .okragly::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; }
@@ -167,24 +193,24 @@ p { margin: 0 0 12px; }
 .pasek-listy { display: none; }
 .chip {
   position: relative; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px;
-  font-size: 14px; font-weight: 500; color: var(--tekst); background: var(--pole); box-shadow: var(--cien); white-space: nowrap;
-  transition: transform .1s ease, background-color .15s ease; touch-action: manipulation;
+  font-size: 14px; font-weight: 500; color: var(--tekst); white-space: nowrap; touch-action: manipulation;
+  background-color: var(--szklo); background-image: var(--szklo-lico); background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: var(--szklo-brzeg), var(--szklo-cien); transition: var(--szklo-ruch);
 }
-.chip:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--akcent) 10%, var(--pole)); }
-.chip:active { transform: scale(.97); }
+.chip:hover { transform: translateY(-1px); }
 /* Wybrany chip ma pierścień w środku swojego obrysu: 2 px akcentu i 2 px przerwy w kolorze tego, na czym stoi (--pod), więc zajmuje
    tyle samo co sąsiedzi i nie wychodzi poza krawędź karty ani siatki (Jacek, 25.10.2026, przez Kasiomobile: pierścień „Ogółem”
-   zaczynał się 4 px przed kartą listy). */
+   zaczynał się 4 px przed kartą listy). Pod pierścieniem pastel z blaskiem szkła i cieniem, jak wybrana pigułka w Kasiomobile. */
 .chip[aria-pressed="true"], .chip[aria-checked="true"] {
-  font-weight: 650; background: color-mix(in srgb, var(--akcent) 18%, var(--karta));
-  box-shadow: inset 0 0 0 2px var(--akcent), inset 0 0 0 4px var(--pod, var(--karta)), 0 2px 8px color-mix(in srgb, var(--akcent) 22%, transparent);
+  font-weight: 650; background-color: color-mix(in srgb, var(--akcent) 18%, var(--karta));
+  box-shadow: inset 0 0 0 2px var(--akcent), inset 0 0 0 4px var(--pod, var(--karta)), var(--szklo-cien-wybranej);
 }
 .chip .ikona { width: 16px; height: 16px; color: var(--drugi); }
 .chip[aria-pressed="true"] .ikona, .chip[aria-checked="true"] .ikona { color: var(--akcent); }
 .chip .sylwetka { width: 38px; height: 16px; }
 .sylwetka { fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linejoin: round; }
 .sylwetka .kolo { fill: var(--karta); }
-.chip .sylwetka .kolo { fill: var(--pole); }
+.chip .sylwetka .kolo { fill: var(--szklo-kolo); }
 .chip[aria-pressed="true"] .sylwetka .kolo { fill: color-mix(in srgb, var(--akcent) 18%, var(--karta)); }
 
 /* ------------------------------------------------------------------ filtry */
@@ -213,11 +239,15 @@ p { margin: 0 0 12px; }
 .lista th:last-child, .lista td:last-child { padding-right: var(--lista-bok); }
 .lista th.liczba, .lista td.liczba { text-align: right; }
 .naglowek-kolumny { position: relative; display: inline-flex; align-items: center; height: 28px; padding: 0 16px; border: 0; border-radius: 14px; font-size: 13px; font-weight: 600;
-  color: var(--drugi); background: var(--strona); box-shadow: var(--cien); white-space: nowrap; }
+  color: var(--drugi); white-space: nowrap;
+  background-color: var(--szklo); background-image: var(--szklo-lico); background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: var(--szklo-brzeg), var(--szklo-cien); transition: var(--szklo-ruch); }
 button.naglowek-kolumny:hover { transform: translateY(-1px); }
 /* Nagłówek, którego nie da się kliknąć (liczba, „Model”, „Na Otomoto”), jest zwykłym napisem, bez kształtu przycisku. */
 span.naglowek-kolumny { padding: 0; background: none; box-shadow: none; }
-th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in srgb, var(--akcent) 12%, var(--karta)); box-shadow: var(--cien), 0 0 0 1.5px var(--akcent); }
+/* Wybrany nagłówek ma blask bez ciemnego końca: link na pastelu z końcem miał w prawym dolnym rogu napisu 4,39:1. */
+th[aria-sort] .naglowek-kolumny { color: var(--link); background-color: color-mix(in srgb, var(--akcent) 12%, var(--karta)); background-image: var(--szklo-blask);
+  box-shadow: 0 0 0 1.5px var(--akcent), var(--szklo-cien-wybranej); }
 /* Wiersze bez pasów na zmianę (Jacek, 25.10.2026, przez Kasiomobile: „wygląda trochę jak paski … Nie ma żadnych takich delikatnych
    podziałów … Apple by to zrobiło lepiej”): biała karta jak lista w iOS, a wiersze dzieli włosek od początku nazwy do prawej krawędzi. */
 .lista tbody tr { --wiersz: var(--karta); cursor: pointer; }
@@ -341,7 +371,7 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .zestaw { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--strona); box-shadow: inset 0 0 0 1px var(--wlosek); }
 /* W ciemnym motywie zestaw stoi na drugim tle (#1c1c1e), jak zestawy w przykładzie, bo czerń na czarnej karcie nie dawała kształtu,
    a jego okrągłe przyciski o stopień jaśniej (#2c2c2e), żeby odcinały się od zestawu (reguła ciemny-motyw-czarny). */
-@media (prefers-color-scheme: dark) { .zestaw { background: #1c1c1e; } .zestaw .okragly { background: var(--pole); } }
+@media (prefers-color-scheme: dark) { .zestaw { background: #1c1c1e; } .zestaw .okragly { background-color: var(--pole); } }
 .zestaw.wylaczony .opis-zestawu { opacity: .55; }
 .zestaw .opis-zestawu b { font-weight: 600; display: block; }
 .zestaw .opis-zestawu span { font-size: 13px; color: var(--drugi); }
@@ -459,10 +489,10 @@ body.w-katalagu .szczegoly, body.w-katalagu .przewodnik, body.w-katalagu .przewo
   .pasek-listy.z-filtrami { display: flex; }
   .pasek-listy .soczewki { display: none; }
   /* Filtry mają 3 z 12 kolumn, jak zakładka i pigułka Kasiomobile przy tej szerokości (Kasiomobile, 25.10.2026: „Ta sama szerokość dla
-     Filtrów postawi je pod pierwszą zakładką”), i wygląd pigułki jak na telefonie: 40 px, szare tło z głębią. Telefon daje im cały rząd.
+     Filtrów postawi je pod pierwszą zakładką”), i wygląd pigułki jak na telefonie: 40 px, szkło z głębią. Telefon daje im cały rząd.
      Napis ma 16,5 px, bo wtedy wersaliki Interu mają równe 12 px i stoją w pigułce 40 px na środku co do piksela przy każdej skali
      (przy 15 px mają 10,9 px i przy skali 1 zostawało 0,5 px ekranu obok środka). */
-  .pasek-listy .przycisk { width: calc((100% - 3 * var(--rzad)) / 4); height: 40px; border-radius: 20px; background: var(--pole); font-size: 16.5px; }
+  .pasek-listy .przycisk { width: calc((100% - 3 * var(--rzad)) / 4); height: 40px; border-radius: 20px; font-size: 16.5px; }
   .siatka-szczegolow, .przewodnik { grid-template-columns: 1fr; }
 }
 
@@ -493,17 +523,17 @@ body.w-katalagu .szczegoly, body.w-katalagu .przewodnik, body.w-katalagu .przewo
   /* Kolumna ma szerokość ekranu, a nie treści: inaczej rząd pigułek rozpycha stronę, zamiast zmaleć (pomiar 24.10.2026: 407 px przy 320). */
   .uklad, .uklad.dwie { grid-template-columns: minmax(0, 1fr); }
   /* Filtry na całą szerokość, pod nimi trzy równe pigułki kolejności, po 4 z 12 kolumn (Jacek, 25.10.2026, przez Kasiomobile: „poukładane
-     według kratek … elegancko wypośrodkowane”). Filtry mają kształt, wysokość i głębię pigułek: szare tło, włosek i cień. Wybrana pigułka
-     ma pastel, pierścień w obrysie i smugę światła co 4 s w barwie losowanej przy starcie (app.js). Wielkość napisu dobiera naSiatce. */
+     według kratek … elegancko wypośrodkowane”). Filtry mają kształt, wysokość i głębię pigułek: szkło z blaskiem, brzegiem i cieniem. Wybrana
+     pigułka ma pastel, pierścień w obrysie i raz, przy wyborze, smugę światła w barwie losowanej przy starcie (app.js). Wielkość napisu dobiera naSiatce. */
   /* Filtry to inna grupa niż pigułki kolejności, więc stoją 24 px nad nimi (Kasiomobile, 25.10.2026: „z większym odstępem od nich”). */
   .pasek-listy, .pasek-listy.z-filtrami { --pod: var(--tlo); display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .pasek-listy .przycisk { width: auto; }
   .pasek-listy .soczewki { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rzad); }
-  .pasek-listy .chip { justify-content: center; min-width: 0; padding: 0; font-size: var(--napis, 15px); background-color: var(--pole); }
+  .pasek-listy .chip { justify-content: center; min-width: 0; padding: 0; font-size: var(--napis, 15px); }
   .pasek-listy .chip[aria-checked="true"] {
     background-color: color-mix(in srgb, var(--akcent) 18%, var(--karta));
-    background-image: linear-gradient(105deg, transparent 42%, color-mix(in srgb, var(--polysk, #fff) var(--polysk-sila), transparent) 50%, transparent 58%);
-    background-size: 260% 100%; background-repeat: no-repeat; background-position: 0 0;
+    background-image: linear-gradient(105deg, transparent 42%, color-mix(in srgb, var(--polysk, #fff) var(--polysk-sila), transparent) 50%, transparent 58%), var(--szklo-lico);
+    background-size: 260% 100%, 100% 100%; background-repeat: no-repeat; background-position: 0 0;
   }
   .naglowek-karty { padding: 16px 16px 12px; }
   .karta-tresc { padding: 16px; }
@@ -547,3 +577,13 @@ body.w-katalagu .szczegoly, body.w-katalagu .przewodnik, body.w-katalagu .przewo
 }
 /* Telefon i wąskie okno do 759 px: jedna rynna 8 px (reguła siatka-wszedzie, --km-rynna Kasiomobile do 759 px). Od 760 px 16 px. */
 @media (max-width: 759px) { :root { --rzad: 8px; } }
+
+/* ------------------------------------------------------------------ wciśnięty przycisk */
+/* Wciśnięty rośnie o 3% i rozświetla się od miejsca dotyku (--mx i --my wpisuje app.js przy pointerdown), a puszczony wraca sprężyście
+   (--szklo-ruch), jak w Kasiomobile. Wybrany i wypełniony tylko rosną, bo mają swój blask. Reguły stoją na końcu, żeby wygrały z :hover. */
+.przycisk:active, .chip:active, .okragly:active, .widok:active, button.naglowek-kolumny:active { transform: scale(1.03); transition: transform .08s ease; }
+.przycisk:not(.glowny):active, .chip:not([aria-pressed="true"], [aria-checked="true"]):active, .okragly:active,
+.widok:not([aria-selected="true"]):active, th:not([aria-sort]) button.naglowek-kolumny:active {
+  background-image: radial-gradient(circle 80px at var(--mx, 50%) var(--my, 50%), var(--szklo-plama), rgba(255, 255, 255, 0) 75%), var(--szklo-lico);
+  background-size: 100% 100%;
+}
