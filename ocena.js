@@ -14,16 +14,19 @@
   const kwartyl = (s, f) => s[Math.min(s.length - 1, Math.max(0, Math.round(f * (s.length - 1))))];
   const mediana = (a) => { const s = [...a].sort((x, y) => x - y); const i = s.length >> 1; return s.length % 2 ? s[i] : (s[i - 1] + s[i]) / 2; };
 
-  // Ogłoszenia modelu po roczniku i przebiegu, ceny „zwykle” (kwartyle) i ile mieści się w budżecie.
+  // Ogłoszenia modelu po roczniku i przebiegu, ceny „zwykle” (kwartyle), ile mieści się w budżecie i co w nim zwykle dostajesz:
+  // rocznik i przebieg ze środka ogłoszeń w budżecie (zaBudzet, od 26.10.2026; najmniej trzy ogłoszenia, inaczej null).
   function rynek(m, f) {
     const og = m.r.filter((o) => o[1] >= f.rokOd && (!f.przebieg || (o[2] && o[2] <= f.przebieg * 1000)));
     const ceny = og.map((o) => o[0]).sort((a, b) => a - b);
     const km = og.map((o) => o[2]).filter(Boolean).sort((a, b) => a - b);
-    const wBudzecie = f.budzet ? og.filter((o) => o[0] <= f.budzet * 1000).length : og.length;
+    const wb = f.budzet ? og.filter((o) => o[0] <= f.budzet * 1000) : [];
+    const wbLata = wb.map((o) => o[1]).sort((a, b) => a - b), wbKm = wb.map((o) => o[2]).filter(Boolean).sort((a, b) => a - b);
     return {
-      ile: og.length, wszystkie: m.r.length, wBudzecie,
+      ile: og.length, wszystkie: m.r.length, wBudzecie: f.budzet ? wb.length : og.length,
       ceny: ceny.length ? [kwartyl(ceny, 0.25), kwartyl(ceny, 0.5), kwartyl(ceny, 0.75)] : null,
       przebieg: km.length ? kwartyl(km, 0.5) : null,
+      zaBudzet: wb.length >= 3 ? { rok: kwartyl(wbLata, 0.5), km: wbKm.length >= 3 ? kwartyl(wbKm, 0.5) : null } : null,
     };
   }
   const rynekBezOgraniczen = (f) => !f.budzet && !f.przebieg && f.rokOd <= ROK_MIN;

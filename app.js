@@ -67,6 +67,10 @@
   // Smuga światła na wybranej pigułce kolejności: barwa losowana przy starcie, jak w widokach (ui.js, polysk), daleko od akcentu.
   const polyskStrony = () => U.polysk(document.body, getComputedStyle(document.documentElement).getPropertyValue('--akcent').trim() || '#0071e3', ciemny.matches);
   polyskStrony();
+  // Smuga przechodzi raz, gdy wybierasz widok albo kolejność (Jacek, 26.10.2026: „jeden raz … jeszcze subtelniejszy”). Lista rysuje się
+  // od nowa przy każdej zmianie, więc wybór zapamiętuje selektor, a smugę daje rysuj po narysowaniu (klasa blysk, styl.css).
+  let blyskNa = null;
+  const blysnij = (e) => { if (!e) return; e.classList.remove('blysk'); void e.offsetWidth; e.classList.add('blysk'); e.addEventListener('animationend', () => e.classList.remove('blysk'), { once: true }); };
   function rysujPasek() {
     const istniejace = [...pasek.children].map((b) => b.dataset.id).join();
     if (istniejace !== st.kolejnosc.join()) {
@@ -101,6 +105,7 @@
     for (const k of tresc.querySelectorAll('.dalej-obszar')) U.przeciagalne(k, '.dalej-wiersz', { os: 'y', poZmianie: (ids, fokus) => { zmien('kolejność podstron', () => { st.podstrony = ids; }); if (fokus) requestAnimationFrame(() => { const b = tresc.querySelector(`.dalej-wiersz[data-id="${fokus}"]`); if (b) b.focus(); }); } });
     if (st.edycja) { const p = tresc.querySelector('.nazwa-zestawu'); if (p) { p.focus(); p.select(); } }
     uloz();
+    if (blyskNa) { blysnij(document.querySelector(blyskNa)); blyskNa = null; }
     if (przewin != null) scrollTo(0, przewin);
     if (sel && !st.edycja && !document.activeElement.closest?.('.zapis')) { const e = (wArkuszu && arkusz.querySelector(sel)) || document.querySelector(sel); if (e && e !== document.activeElement) e.focus({ preventScroll: true }); }
     // W Katalagu Atlas zmienia widok sam tylko z podstron („Pokaż ten zestaw w Modelach”, „Pokaż modele ›”, „Otwórz Modele”) i z Ctrl+Z:
@@ -199,7 +204,7 @@
   }
 
   // ---------------------------------------------------------------- nawigacja
-  function widok(k) { if (!WIDOKI[k]) return; zamknijWszystko(); if (st.widok !== k) { st.widok = k; zapisz(); } rysuj({ przewin: 0 }); }
+  function widok(k) { if (!WIDOKI[k]) return; zamknijWszystko(); if (st.widok !== k) { st.widok = k; zapisz(); blyskNa = `#tab-${k}`; } rysuj({ przewin: 0 }); }
   // Szczegóły i podstrony (Mój ranking, Typy aut w Katalagu) stoją jedne na drugich: model otwarty z podstrony wraca Wsteczem na nią,
   // a podstrona na listę. Model otwarty z modelu albo marki zastępuje poprzedni, jak wcześniej.
   function otworz(rodzaj, id) {
@@ -290,7 +295,7 @@
     if (akc && (!otw || otw.contains(akc))) {
       const d = akc.dataset;
       switch (d.akcja) {
-        case 'soczewka': zmien('kolejność', () => { st.soczewka[d.gdzie] = d.soczewka; }); return;
+        case 'soczewka': if (st.soczewka[d.gdzie] !== d.soczewka) blyskNa = `.pasek-listy .chip[data-soczewka="${d.soczewka}"]`; zmien('kolejność', () => { st.soczewka[d.gdzie] = d.soczewka; }); return;
         case 'wersja': zmien('wersja tekstu', () => { st.calosc[d.gdzie] = d.wersja === 'calosc'; }); scrollTo(0, 0); return;
         case 'wszystkie': zmien('pokaż wszystkie', () => { st.wszystkie[d.co] = !st.wszystkie[d.co]; }); return;
         case 'filtry': otworzArkusz(); return;

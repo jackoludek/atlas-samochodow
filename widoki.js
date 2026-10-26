@@ -20,6 +20,9 @@
     return `<div class="nazwa"><b>${esc(n)}${dwie ? `<span class="lata">${esc(m.lata)}</span>` : ''}</b></div>`; };
   const ocena = (x, s, szac) => (x == null ? '<span class="ocena brak">–</span>' : `<span class="ocena${szac ? ' szac' : ''}" data-s="${s}"><span class="tx">${liczba(x)}</span></span>`);
   const zakres = (ry) => (ry && ry.ceny ? `${tys(ry.ceny[0])}–${tys(ry.ceny[2])} tys. zł` : '');
+  // Co zwykle dostajesz za swój budżet (od 26.10.2026): rocznik i przebieg ze środka ogłoszeń w budżecie (ocena.js, zaBudzet).
+  // W karcie Na Otomoto zdanie niesie też liczbę ogłoszeń w budżecie, więc pod spodem zostaje już tylko źródło i dzień.
+  const zaBudzet = (ry, zLiczba) => (ry && ry.zaBudzet ? `W Twoim budżecie ${zLiczba ? `${ry.wBudzecie} z ${ry.ile} ogłoszeń: ` : ''}zwykle rocznik ${ry.zaBudzet.rok}${ry.zaBudzet.km ? ` i ${tys(ry.zaBudzet.km)} tys. km` : ''}.` : '');
 
   // Pigułki kolejności stoją tylko na telefonie, bo szersze okno ma te same nagłówki kolumn: pod widokami, poza kartą listy, w jednym rzędzie,
   // a w Modelach pod przyciskiem Filtry (Jacek, 24.10.2026: „razem, nie zbite, jedno po drugim”, „najpierw zaczynamy od filtrów … to musi być
@@ -199,16 +202,18 @@
     // Skrót: opis z wnioskiem, jedna zaleta i jedna wada, cena i ogłoszenia. Całość: test, ankieta, rynek, fakty, wszystkie zalety i wady, historia.
     if (!st.calosc.model) return gora
       + `<section class="karta karta-tresc skrot-karta"><p class="sedno">${esc(m.opis)}</p><ul class="kesy"><li><b>Zaleta:</b> ${esc(m.zalety[0])}</li><li><b>Wada:</b> ${esc(m.wady[0])}</li></ul>`
-      + `<p>${ry.ceny ? `Na Otomoto zwykle <b>${zakres(ry)}</b>${ry.przebieg ? `, przebieg zwykle ${tys(ry.przebieg)} tys. km` : ''}.` : 'Na Otomoto za mało ogłoszeń w Twoich filtrach.'}</p>`
+      + `<p>${ry.ceny ? `Na Otomoto zwykle <b>${zakres(ry)}</b>${ry.przebieg ? `, przebieg zwykle ${tys(ry.przebieg)} tys. km` : ''}.${ry.zaBudzet ? ' ' + zaBudzet(ry) : ''}` : 'Na Otomoto za mało ogłoszeń w Twoich filtrach.'}</p>`
       + czytajCalosc('model', 'W całości: wynik testu zderzeniowego krok po kroku, ankieta usterek, wszystkie zalety i wady oraz historia modelu.', ogloszenia)
       + '</section></article>';
     return gora
       + '<div class="siatka-szczegolow">'
       + `<section class="karta karta-tresc"><h2>Bezpieczeństwo</h2><p>Euro NCAP ${n.rok}: ${gwiazdki(n.gw)}</p><div class="paski">${pasek('Dorośli', n.ao)}${pasek('Dzieci', n.co)}${pasek('Systemy', n.sa)}${pasek('Piesi i rowerzyści', n.vru)}</div>`
       + `${n.uwaga ? `<p class="uwaga">${esc(n.uwaga)}</p>` : ''}${n.rok < 2020 ? '<p class="uwaga">Test sprzed 2020 roku liczy się trochę słabiej, bo zasady były łagodniejsze.</p>' : ''}<a href="${esc(n.u)}" target="_blank" rel="noopener">Zobacz test na euroncap.com ↗</a></section>`
-      + `<section class="karta karta-tresc"><h2>Niezawodność</h2>${m.wc ? `<div class="paski">${pasek('Bez usterek', m.wc.proc, 1)}</div><p class="uwaga">${esc(m.wc.zrodlo)}${m.szac ? '. ' + esc(m.szac) : ''}</p><a href="${esc(m.wc.url)}" target="_blank" rel="noopener">Zobacz ankietę ↗</a>` : `<p class="uwaga">${esc(m.szac)}</p>`}</section>`
+      + `<section class="karta karta-tresc"><h2>Niezawodność</h2>${m.wc ? `<div class="paski">${pasek('Bez usterek', m.wc.proc, 1)}</div><p class="uwaga">${esc(m.wc.zrodlo)}${m.szac ? '. ' + esc(m.szac) : ''}</p><a href="${esc(m.wc.url)}" target="_blank" rel="noopener">Zobacz ankietę ↗</a>` : `<p class="uwaga">${esc(m.szac)}</p>`}`
+      + (m.niemcy || []).map((x) => `<p class="uwaga">${esc(x.t)}</p><a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.z)} ↗</a>`).join('') + '</section>'
       + `<section class="karta karta-tresc"><h2>Na Otomoto</h2>${ry.ceny ? `<p><b>Zwykle ${zakres(ry)}</b>, środek ${tys(ry.ceny[1])} tys. zł${ry.przebieg ? `, przebieg zwykle ${tys(ry.przebieg)} tys. km` : ''}.</p>`
-        + `<p class="uwaga">${st.filtry.budzet ? `W Twoim budżecie ${ry.wBudzecie} z ${ry.ile} ogłoszeń` : `${ry.ile} ogłoszeń`} z pierwszej strony wyników, ${esc(dzien(A().stan.otomoto))}.</p>` : `<p class="uwaga">Za mało ogłoszeń w Twoich filtrach (${ry.ile} z ${ry.wszystkie}).</p>`}`
+        + (ry.zaBudzet ? `<p>${zaBudzet(ry, true)}</p>` : '')
+        + `<p class="uwaga">${ry.zaBudzet ? 'Najnowsze ogłoszenia Otomoto' : st.filtry.budzet ? `W Twoim budżecie ${ry.wBudzecie} z ${ry.ile} najnowszych ogłoszeń` : `${ry.ile} najnowszych ogłoszeń`}, ${esc(dzien(A().stan.otomoto))}.</p>` : `<p class="uwaga">Za mało ogłoszeń w Twoich filtrach (${ry.ile} z ${ry.wszystkie}).</p>`}`
       + ogloszenia + '</section>'
       + `<section class="karta karta-tresc"><h2>Na co dzień</h2><dl class="fakty"><div><dt>Nadwozie</dt><dd>${esc(m.nadwozie)}</dd></div>`
       + (seg ? `<div><dt>Wielkość</dt><dd>segment ${esc(m.klasa)}: ${esc(seg.t.toLowerCase())}</dd></div>` : '')
