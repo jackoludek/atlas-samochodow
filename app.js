@@ -154,10 +154,10 @@
     pigulki.forEach((p, i) => { if (Math.abs(o[i]) > 0.001) p.style.top = o[i].toFixed(4) + 'px'; });
   }
   // Siatka (Jacek, 25.10.2026: „wszystko musi być równane do gridu … to nie jest Van Gogh”). Pigułki kolejności na telefonie to trzy równe
-  // pigułki na całą szerokość karty listy, co rynnę siatki (styl.css, --rzad: 12 px, poniżej 380 px 8 px, jak w Kasiomobile): napis tej
+  // pigułki na całą szerokość karty listy, co rynnę siatki (styl.css, --rzad: 8 px do 759 px, szerzej 16 px, jak w Kasiomobile): napis tej
   // samej wielkości we wszystkich trzech, największy od 15 px w dół,
   // przy którym najdłuższy, pogrubiony, mieści się w wybranej z pierścieniem w obrysie (2 px akcentu i 2 px przerwy) i ma jeszcze
-  // 4 px tła z każdej strony, krokami po 0,5 px („Bezpieczeństwo” ma 14 liter). Do tego wysokość wersalików musi dać się postawić na środku
+  // 4 px tła z każdej strony, krokami po 0,25 px (napisy są krótkie: widoki.js, KOLUMNY). Do tego wysokość wersalików musi dać się postawić na środku
   // pigułki co do pół piksela ekranu (pigułka minus wersaliki, w pikselach ekranu, prawie parzyste: najwyżej ćwierć piksela obok),
   // więc napis schodzi jeszcze krokami po ćwierć piksela, gdy wypada między pikselami (wielkość przy każdej szerokości wypisuje
   // testy/zrzuty.js). Chipy filtrów stoją po dwa w rzędzie (data-kol, Kasiomobile, 25.10.2026), a gdy któryś
@@ -171,7 +171,7 @@
       const krzywo = () => { const p = r.children[0], t = p && p.querySelector('.tx'); if (!t) return false;
         const x = (p.getBoundingClientRect().height - t.getBoundingClientRect().height) * (devicePixelRatio || 1) / 2; return Math.abs(x - Math.round(x)) > 0.25; };
       const dobierz = () => { r.style.setProperty('--napis', NAPIS_SOCZEWEK + 'px');
-        let n = Math.max(10, Math.min(NAPIS_SOCZEWEK, Math.floor(NAPIS_SOCZEWEK * Math.min(...[...r.children].map(zapas)) * 2) / 2));
+        let n = Math.max(10, Math.min(NAPIS_SOCZEWEK, Math.floor(NAPIS_SOCZEWEK * Math.min(...[...r.children].map(zapas)) * 4) / 4));
         r.style.setProperty('--napis', n + 'px');
         while (n > 9.5 && ([...r.children].some((p) => zapas(p) < 1) || krzywo())) { n -= 0.25; r.style.setProperty('--napis', n + 'px'); }
         return n; };

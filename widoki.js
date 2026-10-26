@@ -5,7 +5,9 @@
   const O = window.AtlasOcena, U = window.AtlasUI;
   const { esc, ik, liczba, tys, odmiana } = U;
   const A = () => window.ATLAS;
-  const KOLUMNY = [['ogolem', 'Ogółem', 'gwiazda'], ['bezp', 'Bezpieczeństwo', 'tarcza'], ['niez', 'Niezawodność', 'klucz']];
+  // Czwarte pole to napis pigułki kolejności na telefonie. Pełne nazwy w trzech równych pigułkach dawały na telefonie Jacka 11,5 px,
+  // a przy 320 px 9,5 px (pomiar 25.10.2026), czyli poniżej czytelności. „Bezpieczne” i „Niezawodne” mają rdzeń nagłówków kolumn i kart.
+  const KOLUMNY = [['ogolem', 'Ogółem', 'gwiazda', 'Ogółem'], ['bezp', 'Bezpieczeństwo', 'tarcza', 'Bezpieczne'], ['niez', 'Niezawodność', 'klucz', 'Niezawodne']];
   const MALY = { s: 'M18 38 L18 30 Q19 27 23 26 L34 25 L44 14 Q46 12 50 12 L80 12 Q84 12 87 15 L96 26 Q99 28 99 32 L99 38 Z', k: [34, 84, 6] };
   const SYL = { maly: 'maly', kompakt: 'hatchback', kombi: 'kombi', suv: 'suv', van: 'van', limuzyna: 'sedan' };
   const nadwozie = (id) => (id === 'maly' ? MALY : A().przewodnik.nadwozia.find((n) => n.id === id));
@@ -22,8 +24,8 @@
   // Pigułki kolejności stoją tylko na telefonie, bo szersze okno ma te same nagłówki kolumn: pod widokami, poza kartą listy, w jednym rzędzie,
   // a w Modelach pod przyciskiem Filtry (Jacek, 24.10.2026: „razem, nie zbite, jedno po drugim”, „najpierw zaczynamy od filtrów … to musi być
   // w linii”). Od 25.10.2026 to trzy równe pigułki na całą szerokość karty listy (siatka 12 kolumn, po 4), a wielkość napisu dobiera
-  // app.js (naSiatce). Napis ma od razu miejsce na pogrubienie wybranej (data-n).
-  const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, n]) =>
+  // app.js (naSiatce), a napis jest krótki (KOLUMNY, czwarte pole). Napis ma od razu miejsce na pogrubienie wybranej (data-n).
+  const soczewki = (akt, gdzie) => `<div class="soczewki" role="radiogroup" aria-label="Kolejność">` + KOL.map(([k, , , n]) =>
     `<button class="chip" type="button" role="radio" aria-checked="${k === akt}" data-akcja="soczewka" data-gdzie="${gdzie}" data-soczewka="${k}" data-id="${k}"><span class="napis" data-n="${n}"><span class="tx">${n}</span></span></button>`).join('') + '</div>';
   const pasekListy = (akt, gdzie, filtry = '') => `<div class="pasek-listy${filtry ? ' z-filtrami' : ''}">${filtry}${soczewki(akt, gdzie)}</div>`;
   // Atlas w zakładce Katalag Kasiomobile (od 25.10.2026, ?k=katalag): rząd widoków rysuje Kasiomobile (tylko Marki i Modele, pełnymi
@@ -67,7 +69,8 @@
     return `<div class="uklad waski">${pasekListy(akt, 'marki')}<section class="karta" aria-label="Ranking marek">`
       + `<table class="lista">${naglowki(akt, 'marki', lista.length)}<tbody>${wiersze}</tbody></table>`
       + przyciskWiecej('marki', st.wszystkie.marki, lista.length)
-      + (malo.length ? `<div class="grupa-malo">Za mało danych do rankingu</div><table class="lista malo"><tbody>${reszta}</tbody></table>` : '')
+      // Marki bez rankingu stoją dopiero w pełnej liście, pod „Pokaż wszystkie” (25.10.2026: na telefonie wydłużały pierwszy ekran o siedem wierszy).
+      + (malo.length && (st.wszystkie.marki || lista.length <= 10) ? `<div class="grupa-malo">Za mało danych do rankingu</div><table class="lista malo"><tbody>${reszta}</tbody></table>` : '')
       + '<div style="height:12px"></div></section>' + dalej(st) + '</div>';
   }
 

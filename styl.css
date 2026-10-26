@@ -232,8 +232,10 @@ th[aria-sort] .naglowek-kolumny { color: var(--link); background: color-mix(in s
 .nazwa { display: grid; gap: 2px; min-width: 0; }
 .nazwa b { font-weight: 600; color: var(--link); }
 /* Pod nazwą nie ma podpisu (Jacek, 25.10.2026: „Żadnych podpisów pod samochodami”). Lata stoją w tej samej linii tylko przy dwóch
-   generacjach o tej samej nazwie. */
-.nazwa .lata { margin-left: .4em; font-weight: 400; color: var(--drugi); }
+   generacjach o tej samej nazwie. Gdy się nie mieszczą (320 px), schodzą w całości do drugiej linii, równo z nazwą: wcześniej
+   „od” zostawało przy nazwie, a „2020” schodziło niżej (25.10.2026). */
+.nazwa b:has(> .lata) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .4em; }
+.nazwa .lata { font-weight: 400; color: var(--drugi); white-space: nowrap; }
 .ocena { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 4.2em; height: 24px; padding: 0 10px;
   border-radius: 999px; font-size: 14px; font-weight: 500;
   color: var(--s-tekst); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--s, var(--pole)) 42%, var(--wiersz, var(--karta))); }
